@@ -1,0 +1,36 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m4",
+    "extra_flags": "-DSTM32F427xx -DSTM32",
+    "f_cpu": "180000000L",
+    "mcu": "stm32f427zitx",
+    "product_line": "STM32F427xx",
+    "variant": "STM32F4xx",
+    "fpu": "hard",
+    "fpv": "fpv4-sp-d16"
+  },  
+  "debug": {
+    "jlink_device": "STM32F427ZI",
+    "openocd_target": "stm32f4x",
+    "svd_path": "STM32F427.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "cmsis",
+    "stm32cube",
+    "libopencm3"
+  ],
+  "name": "Flight Computer",
+  "upload": {
+    "maximum_ram_size": 256000,
+    "maximum_size": 2097152,
+    "protocol": "serial",
+    "protocols": [
+      "serial",
+      "stlink"
+    ]
+  },
+  "url": "https://mcgillrocketteam.com",
+  "vendor": "MRT"
+}

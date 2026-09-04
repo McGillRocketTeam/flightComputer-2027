@@ -1,0 +1,11 @@
+{
+  "name": "FreeRTOS",
+  "version": "10.3.1",
+  "build": {
+    "includeDir": "Source/include",
+    "flags": [
+      "-I Source/portable/GCC/ARM_CM4F",
+      "-I Source/CMSIS_RTOS_V2"
+    ]
+  }
+}

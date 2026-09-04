@@ -1,0 +1,36 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m4",
+    "extra_flags": "-DSTM32F303xC -DSTM32",
+    "f_cpu": "72000000L",
+    "mcu": "stm32f303cbt6",
+    "product_line": "STM32F303xC",
+    "variant": "STM32F3xx/F303C(B-C)T",
+    "fpu": "hard",
+    "fpv": "fpv4-sp-d16"
+  },  
+  "debug": {
+    "jlink_device": "STM32F303CB",
+    "openocd_target": "stm32f3x",
+    "svd_path": "STM32F303x.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "cmsis",
+    "stm32cube",
+    "libopencm3"
+  ],
+  "name": "Propulsion Controller",
+  "upload": {
+    "maximum_ram_size": 32000,
+    "maximum_size": 128000,
+    "protocol": "serial",
+    "protocols": [
+      "serial",
+      "stlink"
+    ]
+  },
+  "url": "https://mcgillrocketteam.com",
+  "vendor": "MRT"
+}
