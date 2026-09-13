@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "MRT_main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,11 +159,7 @@ void StartTelemetry(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartTelemetry */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+    blinky();
   /* USER CODE END StartTelemetry */
 }
 
