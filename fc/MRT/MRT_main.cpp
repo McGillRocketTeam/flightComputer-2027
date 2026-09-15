@@ -5,11 +5,11 @@
 // Called on Telemetry thread
 void blinky(){
     while(1){
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(OUT_LED2_GPIO_Port, OUT_LED2_Pin, GPIO_PIN_SET);
 
         osDelay(500);
 
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(OUT_LED2_GPIO_Port, OUT_LED2_Pin, GPIO_PIN_RESET);
         
         osDelay(500);
     }
