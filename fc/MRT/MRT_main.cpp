@@ -4,12 +4,28 @@
 
 // Called on Telemetry thread
 void blinky(){
+
+    volatile int test = 0;
+    volatile bool doLED1 = false;
+    GPIO_TypeDef* port = OUT_LED2_GPIO_Port;
+    int pin = OUT_LED2_Pin;
     while(1){
-        HAL_GPIO_WritePin(OUT_LED2_GPIO_Port, OUT_LED2_Pin, GPIO_PIN_SET);
+        if(doLED1){
+            port = OUT_LED1_GPIO_Port;
+            pin = OUT_LED1_Pin;
+        } else {
+            port = OUT_LED2_GPIO_Port;
+            pin = OUT_LED2_Pin;
+        }
+
+
+        HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
 
         osDelay(500);
 
-        HAL_GPIO_WritePin(OUT_LED2_GPIO_Port, OUT_LED2_Pin, GPIO_PIN_RESET);
+        test++;
+
+        HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
         
         osDelay(500);
     }
