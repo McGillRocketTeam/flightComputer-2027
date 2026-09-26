@@ -15,6 +15,3 @@ class Commands {
    private:
     std::map<CommandCode, int (*&)()> commandMap;
 };
-
-
-// registerCommand((mission == 2Stage) ? 2STAGE_EJECT : TECHDEV_EJECT, *eject);
