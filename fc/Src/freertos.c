@@ -105,7 +105,8 @@ void vApplicationDaemonTaskStartupHook(void)
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+    /* init code for USB_DEVICE */
+    MX_USB_DEVICE_Init();
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -159,7 +160,7 @@ void StartTelemetry(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartTelemetry */
-    blinky();
+    MRT_main();
   /* USER CODE END StartTelemetry */
 }
 
