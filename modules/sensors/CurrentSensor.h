@@ -1,5 +1,6 @@
 #pragma once
+#include "sensors/Sensor.h"
 
-class CurrentSensor{
+class CurrentSensor : Sensor{
 
 };

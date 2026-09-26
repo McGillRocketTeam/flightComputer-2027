@@ -1,5 +1,6 @@
 #pragma once
+#include "sensors/Sensor.h"
 
-class Magnetometer{
+class Magnetometer : Sensor{
 
 };
