@@ -26,11 +26,11 @@ class Telemetry {
    public:
     Telemetry();
 
-    bool addCurrentSensor(CurrentSensor& sensor);
-    bool addMagnetometer(Magnetometer& sensor);
-    bool addGPS(GPS& sensor);
-    bool addIMU(IMU& sensor);
-    bool addSD(SDCard& sd_card);
+    bool addCurrentSensor(CurrentSensor* sensor){this->currentSensor = sensor;};
+    bool addMagnetometer(Magnetometer* sensor){this->magnetometer = sensor;};
+    bool addGPS(GPS* sensor){this->gps = sensor;};
+    bool addIMU(IMU* sensor){this->imu = sensor;};
+    bool addSD(SDCard* sd_card){this->sd_card = sd_card;};
 
     void pollTelemetry();
 
@@ -41,6 +41,13 @@ class Telemetry {
     static std::function<uint8_t*(Telemetry*)> atomic_fill_functions [AT_TOTAL];
 
     uint16_t writeSD();
+
+    CurrentSensor* currentSensor;
+    Magnetometer* magnetometer;
+    GPS* gps;
+    IMU* imu;
+    SDCard* sd_card;
+
     struct rocket_telem {
         flight_stage_t flight_stage;
         float altitude_from_ground_ft;
