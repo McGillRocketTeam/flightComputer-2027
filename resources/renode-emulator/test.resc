@@ -1,0 +1,25 @@
+# Feed recorded flight data into the emulated sensors.
+#
+# Run after startup.resc, once the board has finished MRT_Init. The LSM6DSR feeds
+# need the output data rate, which resets to Disabled and is only set by the driver
+# during init - feeding earlier fails with "Frequency must be higher than zero".
+#
+# The models use StartExactSampleFeedThread, which takes no sampling rate: playback
+# is paced by the timestamps in the RESD block, and feed() passes
+# RESDStreamSampleOffset.CurrentVirtualTime so the log is rebased onto the machine's
+# current virtual time. Without that, every sample is in the past and Renode
+# discards the whole file ("RESD: Skipping sample").
+#
+# There is no quiet_first option: Renode 1.17 exposes no global log-level setter from
+# Monitor Python, so the register-warning flood cannot be silenced. Completion is
+# reported to %TEMP%\renode_resd_status.txt instead - check it with:
+#
+#     python "feedstatus()"
+#
+# Playback takes ~3.5 minutes of wall clock: the log is 61 s of emulated time and
+# this board runs Renode at roughly 30% of real time.
+#
+# Change the argument to use a different file, or set $env:MRT_DATA_DIR and pass a
+# bare filename.
+
+python "feedall('data/data.resd')"

@@ -1,0 +1,15 @@
+$name = "FC"
+$platform = @fcv8.repl
+$program = @programs/rtos.elf
+
+mach create "FC"
+mach set "FC"
+machine LoadPlatformDescription$platform
+sysbus LoadELF $program
+include @host_cmd.py
+showAnalyzer sysbus.uart4
+
+sysbus.i2c2.ms5611 Pressure 963.61
+sysbus.i2c2.ms5611 Temperature 48.03
+
+start

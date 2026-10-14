@@ -1,0 +1,11 @@
+﻿mach create "FC"
+mach set "FC"
+machine LoadPlatformDescription @fcv8.repl
+sysbus LoadELF @programs/rtos.elf
+include @host_cmd.py
+python "feed('sysbus.i2c2.ms5611','FeedPressureSamplesFromRESD','data/data.resd')"
+python "feed('sysbus.i2c2.ms5611','FeedTemperatureSamplesFromRESD','data/data.resd')"
+start
+sleep 45
+python "probe(3,0.5)"
+quit

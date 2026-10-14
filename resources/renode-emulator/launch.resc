@@ -1,0 +1,25 @@
+$delay = 2
+
+python "hostcmd_str('ea')"
+
+sleep $delay
+
+python "hostcmd_str('pi')"
+
+sleep $delay
+
+python "hostcmd_str('p2')"
+
+sleep $delay
+
+python "hostcmd_str('ul')"
+
+sleep $delay
+
+python "hostcmd_str('pl')"
+
+sleep $delay
+
+echo "Beginning Feed"
+
+include @test.resc      

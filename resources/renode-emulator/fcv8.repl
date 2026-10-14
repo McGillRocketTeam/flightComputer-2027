@@ -1,0 +1,94 @@
+using "stm32f427.repl"  
+
+// CAN1 workaround. Renode's CAN.STMCAN does not implement the bxCAN init
+// handshake: writing MCR.INRQ enters init mode on hardware regardless of
+// MCR.SLEEP, but the model requires INRQ=1 AND SLEEP=0 together. MCR resets to
+// 0x00010002 (DBF|SLEEP) and HAL_CAN_Init only ORs INRQ into what it reads, so
+// it writes 0x00010003, which matches neither branch. INAK is never asserted,
+// the driver's 10 ms poll expires, and MX_CAN1_Init calls Error_Handler before
+// MX_UART4_Init runs. Clearing SLEEP below makes the driver's own write take the
+// init-mode path; verified 0x00010003 -> INAK=0, 0x00000001 -> INAK=1.
+//
+// This depends on HAL_CAN_Init doing a read-modify-write on MCR; it will break
+// if the driver writes MCR without reading first. Replacing can1 with a model
+// that implements the handshake is not possible from this file: stm32f4.repl
+// declares can1, so it arrives here as an imported variable whose type cannot
+// be changed, and both `can1: @none` and a re-declaration fail with E02. The
+// fix would have to go in stm32f4.repl. Delete this block when moving to an H7,
+// which uses CAN.MCAN and is unaffected.
+
+sysbus:
+    init:
+        ApplySVD @STM32F427x.svd
+        // clear MCR.SLEEP before the driver reads MCR for its INRQ set
+        WriteDoubleWord 0x40006400 0x00010001
+        Tag <0x40002C00, 0x40002FFF> "WWDG"
+        Tag <0x40007400, 0x400077FF> "DAC"
+        Tag <0x40015800, 0x40015BFF> "SAI1"
+        Tag <0x40015C00, 0x40015FFF> "SAI2"
+        Tag <0x40040000, 0x400401FF> "OTG_HS_GLOBAL"
+        Tag <0x40040400, 0x400407FF> "OTG_HS_HOST"
+        Tag <0x40040800, 0x40040BFF> "OTG_HS_DEVICE"
+        Tag <0x40040E00, 0x40040FFF> "OTG_HS_PWRCLK"
+        Tag <0x50000000, 0x500003FF> "OTG_FS_GLOBAL"
+        Tag <0x50000400, 0x500007FF> "OTG_FS_HOST"
+        Tag <0x50000800, 0x50000BFF> "OTG_FS_DEVICE"
+        Tag <0x50000E00, 0x50000FFF> "OTG_FS_PWRCLK"
+        Tag <0x50050000, 0x500503FF> "DCMI"
+        Tag <0xA0000000, 0xA000FFFF> "FMC"
+        Tag <0xE0042000, 0xE0042FFF> "DBGMCU"
+        // FLASH and USB tags are required for CubeMX-based projects to pass
+        // the initialization phase
+        Tag <0x50000010, 0x5000003f> "USB:RESET" 0x80000000
+
+lis2mdl: Sensors.LIS2MDL @ i2c2 0x1E
+    preinit:
+        include @peripherals/LIS2MDL.cs
+
+lsm6dsr: Sensors.LSM6DSR_IMU @ i2c2 0x6A
+    preinit:
+        include @peripherals/LSM6DSR_IMU.cs
+
+ms5611: Sensors.MS5611 @ i2c2 0x76
+    preinit:
+        include @peripherals/MS5611.cs
+
+// MRT_setup.h: INA219_I2C is hi2c3 and INA219_ADDRESS is 0x40, so unlike every
+// other board sensor this one sits on the third I2C controller, not i2c2.
+ina219: Sensors.INA219 @ i2c3 0x40
+    preinit:
+        include @peripherals/INA219.cs
+
+// Bus: bus_read() loads its SPI handle from 0x20000718, which is hspi5, so this
+// must attach to spi5. Attaching it to spi4 does nothing useful and masks that
+// bus's warnings, which made it look like the fix had worked.
+//
+// PCAL9714 8-bit I/O expander. MRT_EnergizeBreakout_Init() calls
+// pcal9714_init(), which reads register 0x40 and requires 0xFF as a chip-ID check
+// before it will continue. With nothing on the bus, HAL_SPI_Transmit and
+// HAL_SPI_Receive sit in SPI_WaitFlagStateUntilTimeout until their 1 s timeout
+// expires, which burns the 3 s IWDG budget during MRT_Init and resets the board
+// mid-initialisation. This model accepts every transfer and reads back 0xFF.
+//
+// It is a stub, not a functional expander: continuity, arm/energize and pin-level
+// reads all return fabricated values. It exists to pass the ID check and stop the
+// SPI timeouts. Remove it once a real PCAL9714 model exists.
+pcal9714: SPI.PCAL9714 @ spi5
+    preinit:
+        include @peripherals/PCAL9714.cs
+
+// SX127x/SX126x-family LoRa radio on SPI2. Pin map taken from fc.ioc:
+//
+//   PB12 SX_CS   GPIO_Output  PULLUP   MCU -> radio  (so not a model output)
+//   PD11 SX_RST  GPIO_Output  NOPULL   MCU -> radio  (so not a model output)
+//   PD9  SX_BUSY GPIO_Input   PULLDOWN radio -> MCU  -> Connections[2]
+//   PD10 SX_DIO  GPXTI10      PULLDOWN radio -> MCU  -> Connections[0]
+//
+// Wiring DIO0 is what matters. With PD10 undriven, a transition on it raised
+// EXTI line 10 during MRT_Init; HAL_GPIO_EXTI_Callback then called
+// xQueueGiveFromISR with a NULL sxDioSemaphore and spun forever at 0x8031e34,
+// starving the 3 s IWDG. The model holds DIO0 and BUSY low, so no edge occurs.
+// CS and RST stay unconnected because the MCU drives them as GPIO outputs.
+sx126x: SPI.SX126x @ spi2
+    preinit:
+        include @peripherals/SX126x.cs

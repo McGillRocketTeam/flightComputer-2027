@@ -1,0 +1,154 @@
+﻿// STM32F427 / STM32F437 (Cortex-M4F, up to 2 MB Flash, 192 KB SRAM incl. 64 KB CCM)
+//
+// Renode does not ship a platform for this exact part, so this SoC-level
+// description is derived from the generic STM32F4 platform. That is the right
+// base: platforms/cpus/stm32f429.repl is *not* usable directly because it adds
+// the LTDC display controller, which only exists on the F429/F439.
+//
+// Everything the generic F4 file gets right (NVIC numbering, RCC, DMA, GPIO
+// alternate functions, CAN, Ethernet, timers, ...) is inherited through `using`;
+// only the F427 specific bits are restated below.
+//
+// Relative to platforms/cpus/stm32f4.repl this file:
+//   * swaps the STM32F40x SVD for the accurate STM32F427x one (bundled next to
+//     this file - Antmicro's SVD server has no STM32F427x build)
+//   * shrinks SRAM to the real 128 KB and adds the 64 KB CCM RAM at 0x10000000
+//   * adds USART6, UART7, UART8, SPI4/5/6, ADC1/2/3, SYSCFG and SDMMC1
+//   * names the remaining F427-only blocks so register lookups resolve
+
+using "platforms/cpus/stm32f4.repl"
+
+// SYSCFG models SYSCFG_EXTICR, which is what selects which GPIO port drives each
+// EXTI line. Renode's own stm32f4.repl declares no SYSCFG at all, so on that
+// platform EXTICR is inert and every port's pin N is ORed into EXTI line N.
+// Wiring the ports into SYSCFG, and SYSCFG onward to EXTI, mirrors what
+// Renode's stm32h7.repl does:
+//
+//     gpioPortA: [0-15] -> syscfg#0@[0-15]
+//     syscfg:    [0-15] -> exti@[0-15]
+//
+// Without this, an edge on a pin the firmware never configured (PA10 here) can
+// raise an EXTI line that SYSCFG_EXTICR says belongs to a different port.
+syscfg: Miscellaneous.STM32_SYSCFG @ sysbus 0x40013800
+    [0-15] -> exti@[0-15]
+
+gpioPortA:
+    [0-15] -> syscfg#0@[0-15]
+
+gpioPortB:
+    [0-15] -> syscfg#1@[0-15]
+
+gpioPortC:
+    [0-15] -> syscfg#2@[0-15]
+
+gpioPortD:
+    [0-15] -> syscfg#3@[0-15]
+
+gpioPortE:
+    [0-15] -> syscfg#4@[0-15]
+
+gpioPortF:
+    [0-15] -> syscfg#5@[0-15]
+
+gpioPortG:
+    [0-15] -> syscfg#6@[0-15]
+
+gpioPortH:
+    [0-15] -> syscfg#7@[0-15]
+
+gpioPortI:
+    [0-15] -> syscfg#8@[0-15]
+
+gpioPortJ:
+    [0-15] -> syscfg#9@[0-15]
+
+gpioPortK:
+    [0-15] -> syscfg#10@[0-15]
+
+// ---------------------------------------------------------------------------
+// Memory map (RM0090)
+// ---------------------------------------------------------------------------
+
+// SRAM: 240 KB contiguous @ 0x20000000, per the F427 memory map (Figure 19):
+//   0x20000000-0x2001BFFF  SRAM1  112 KB
+//   0x2001C000-0x2001FFFF  SRAM2   16 KB
+//   0x20020000-0x2003BFFF  SRAM3  112 KB
+//   0x2003C000-0x2003FFFF  reserved
+// The generic F4 file models 256 KB, which runs into the reserved hole and is
+// wrong for this part. A used file cannot be re-declared, so this has to be an
+// updating entry (attributes only).
+sram:
+    size: 0x3C000
+
+// Core coupled memory: 64 KB @ 0x10000000, not modelled by the generic F4 file.
+// It is not reachable by DMA, which is exactly why the split matters.
+ccm: Memory.MappedMemory @ sysbus 0x10000000
+    size: 0x10000
+
+// ---------------------------------------------------------------------------
+// Peripherals the generic F4 file does not declare
+// ---------------------------------------------------------------------------
+
+usart6: UART.STM32_UART @ sysbus <0x40011400, +0x100>
+    -> nvic@71
+
+uart7: UART.STM32_UART @ sysbus <0x40007800, +0x100>
+    -> nvic@82
+
+uart8: UART.STM32_UART @ sysbus <0x40007C00, +0x100>
+    -> nvic@83
+
+// SPI4/5/6 use the SPI v2 register layout, which SPI.STM32SPI implements.
+spi4: SPI.STM32SPI @ sysbus 0x40013400
+    series: STM32Series.F4
+    IRQ -> nvic@84
+
+spi5: SPI.STM32SPI @ sysbus 0x40015000
+    series: STM32Series.F4
+    IRQ -> nvic@85
+
+spi6: SPI.STM32SPI @ sysbus 0x40015400
+    series: STM32Series.F4
+    IRQ -> nvic@86
+
+adc1: Analog.STM32_ADC @ sysbus 0x40012000
+    IRQ -> nvic@18
+
+adc2: Analog.STM32_ADC @ sysbus 0x40012100
+    IRQ -> nvic@18
+
+adc3: Analog.STM32_ADC @ sysbus 0x40012200
+    IRQ -> nvic@18
+
+// SDMMC1. No card is attached; add one from a script if needed, e.g.
+// `machine SdCardFromFile @image.img sysbus.sdmmc 0x0 false`.
+sdmmc: SD.STM32FSDMMC @ sysbus 0x40012C00
+    IRQ -> nvic@49
+
+// ---------------------------------------------------------------------------
+// Blocks with no Renode model. `Tag` only gives the SVD somewhere to attach
+// names; reads still fall through to unmapped. Replace these with real models
+// (or Python peripherals) as soon as the firmware under test touches them.
+// ---------------------------------------------------------------------------
+
+sysbus:
+    init:
+        ApplySVD @STM32F427x.svd
+        Tag <0x40002C00, 0x40002FFF> "WWDG"
+        Tag <0x40007400, 0x400077FF> "DAC"
+        Tag <0x40015800, 0x40015BFF> "SAI1"
+        Tag <0x40015C00, 0x40015FFF> "SAI2"
+        Tag <0x40040000, 0x400401FF> "OTG_HS_GLOBAL"
+        Tag <0x40040400, 0x400407FF> "OTG_HS_HOST"
+        Tag <0x40040800, 0x40040BFF> "OTG_HS_DEVICE"
+        Tag <0x40040E00, 0x40040FFF> "OTG_HS_PWRCLK"
+        Tag <0x50000000, 0x500003FF> "OTG_FS_GLOBAL"
+        Tag <0x50000400, 0x500007FF> "OTG_FS_HOST"
+        Tag <0x50000800, 0x50000BFF> "OTG_FS_DEVICE"
+        Tag <0x50000E00, 0x50000FFF> "OTG_FS_PWRCLK"
+        Tag <0x50050000, 0x500503FF> "DCMI"
+        Tag <0xA0000000, 0xA000FFFF> "FMC"
+        Tag <0xE0042000, 0xE0042FFF> "DBGMCU"
+        // FLASH and USB tags are required for CubeMX-based projects to pass
+        // the initialization phase
+        Tag <0x50000010, 0x5000003f> "USB:RESET" 0x80000000
