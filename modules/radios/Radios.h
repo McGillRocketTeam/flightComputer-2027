@@ -1,8 +1,11 @@
 #pragma once
-#include <RadioLib.h>
-#include <radios/STM32HAL.h>
+
 #include <radios/AtomicRules.h>
 #include <telemetry/Telemetry.h>
+#include <commands/Commands.h>
+
+#include <RadioLib.h>
+#include <radios/STM32HAL.h>
 
 #include <FreeRTOS.h>
 #include <semphr.h>
@@ -34,7 +37,7 @@ enum AstraState{
 
 class Radio{
     public:
-    Radio(FrequencyBand freq);
+    Radio(FrequencyBand freq, Commands*);
     void addTelemetry(Telemetry* telemetry){this->telemetry = telemetry;};
 
     // Begins radio on configured frequency
@@ -74,6 +77,7 @@ class Radio{
     uint16_t id_to_ack = 0;
 
     Telemetry* telemetry = nullptr;
+    Commands* commands = nullptr;
 
     FrequencyBand freq;
 

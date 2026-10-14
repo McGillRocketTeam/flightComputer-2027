@@ -4,9 +4,10 @@
 #include <util/HAL.h>
 #include <util/helpers.h>
 
-Radio::Radio(FrequencyBand freq)
+Radio::Radio(FrequencyBand freq, Commands* commands)
     : freq(freq)
     , stmHAL(RADIO_SPI)
+    , commands(commands)
     , mod(&stmHAL, 
         STM32_PIN(SX_CS_GPIO_Port, SX_CS_Pin),
         STM32_PIN(SX_DIO_GPIO_Port, SX_DIO_Pin),
@@ -160,26 +161,16 @@ void Radio::getReceived(){
 
     int16_t state = radio->readData(data, len);
 
-    if(state != RADIOLIB_ERR_NONE){
+    if(state != RADIOLIB_ERR_NONE || len <= 0){
         println("ERROR READING RECEIVED");
         return;
     }
+    
+    // First Byte is the ID, all others are the argument payload
+    // Extract and adjust accordingly
+    CommandID id = ((CommandID) data[0]);
+    uint8_t* args = data + 1;
+    size_t args_len = len-1;
 
-    command_packet_extended packet;
-
-    // Copy packet data, and args if present out
-    if(len == sizeof(command_packet) || len == sizeof(command_packet_extended)){
-        size_t len_command = sizeof(packet.data.base);
-        memcpy(&(packet.data.base), data, len_command);
-
-        if(len == sizeof(command_packet_extended)){
-            size_t len_argc = sizeof(packet.data.argc);
-            size_t len_args = sizeof(packet.data.args);
-
-            memcpy(&(packet.data.argc), data + len_command, len_argc);
-            memcpy(&(packet.data.args), data + len_command + len_argc, len_args);
-        }
-    }
-
-    // PARSE COMMAND HERE
+    commands->runCommand(id, args, args_len);
 }
