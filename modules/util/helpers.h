@@ -1,6 +1,8 @@
 #ifndef MRT_HBL_HBL_HELPERS_H_
 #define MRT_HBL_HBL_HELPERS_H_
 
+#define PRINT
+
 #ifdef __cplusplus
 extern "C" {
 #endif

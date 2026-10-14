@@ -16,7 +16,7 @@ void setCallback(uint32_t interruptNum, void (*cb)(void));
 
 void setCallback(uint32_t interruptNum, void (*cb)(void*), void* context);
 
-static void MRT_HAL_functionAsContext(void* ctx);
+void MRT_HAL_functionAsContext(void* ctx);
 
 #endif
 
