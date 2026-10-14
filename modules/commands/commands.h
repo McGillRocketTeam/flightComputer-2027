@@ -1,17 +1,19 @@
 #pragma once
 #include <stdint.h>
-#include <map>
+#include <telemetry/generated/command_packet_examples.h>
 
-typedef uint8_t CommandCode;
+using CommandFn = int (*)();
 
 class Commands {
    public:
     Commands();
 
-    bool registerCommand(CommandCode command_code, int (*&command_function)());
+    bool registerCommand(CommandID command_code, CommandFn command_function);
 
-    bool runCommand(CommandCode command_code);
+    bool runCommand(CommandID command_code){return runCommand(command_code, nullptr, 0);};
+
+    bool runCommand(CommandID command_code, uint8_t* data, size_t len);
 
    private:
-    std::map<CommandCode, int (*&)()> commandMap;
+    CommandFn commandMap[NUM_COMMANDS];
 };
