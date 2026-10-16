@@ -57,7 +57,7 @@ bool Commands::checkValid(CommandID id, uint8_t* data, size_t len) {
 
     size_t desired_len = argPackLengths[id];
 
-    if (desired_len <= 0) {
+    if (desired_len < 0) {
         // Reject non-argumented commands
         return false;
     }
