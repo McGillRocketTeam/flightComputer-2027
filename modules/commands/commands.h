@@ -16,4 +16,9 @@ class Commands {
 
    private:
     CommandFn commandMap[NUM_COMMANDS];
+
+    bool checkValid(CommandID id, uint8_t* data, size_t len);
+
+    template <typename T>
+    T Commands::handleArgs(T& args, uint8_t* data, size_t len);
 };

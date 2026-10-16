@@ -56,7 +56,7 @@ bool Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
     };
 }
 
-bool checkValid(CommandID id, uint8_t* data, size_t len) {
+bool Commands::checkValid(CommandID id, uint8_t* data, size_t len) {
     if (id < 0 || id >= NUM_COMMANDS) {
         // Reject invalid commands
         return false;
@@ -78,7 +78,7 @@ bool checkValid(CommandID id, uint8_t* data, size_t len) {
 
 // Handles args and prevents de-ref null data pointer
 template <typename T>
-T handleArgs(T& args, uint8_t* data, size_t len){
+T Commands::handleArgs(T& args, uint8_t* data, size_t len){
     if(!data){
         args = {0};
     } else {
