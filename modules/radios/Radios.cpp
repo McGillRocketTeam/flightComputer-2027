@@ -133,6 +133,8 @@ void Radio::transmit(){
         }
     }
 
+    header.atomics_bitmap = atomics;
+
     // Get ASTRA Payload from Telemetry if able, otherwise just send empty header
     size_t header_len = sizeof(FrameHeader);
 
