@@ -1,20 +1,22 @@
 #include <commands/commands.h>
 #include "stm32f4xx.h"
+#include <util/helpers.h>
+#include <radios/Radios.h>
 
-
-bool Commands::registerCommand(CommandID command_code, CommandFn command_function){
+template <typename T>
+bool Commands::bindModule(T* module){
     if(command_code < 0 || command_code >= NUM_COMMANDS){
         // Reject Invalid Commands
         return false;
     }
 
-    if(commandMap[command_code] != nullptr){
-        // Reject already bound commands
+    mod = std::get<T*>(boundModules)
+
+    if(!mod){
         return false;
     }
 
-    commandMap[command_code] = command_function;
-    return true;
+    mod = module;
 }
 
 void changeFreq(CHANGE_FREQ_ArgPack);
@@ -40,19 +42,15 @@ bool Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
         case (CHANGE_FREQ): {
             // As Examples of arg commands
             CHANGE_FREQ_ArgPack args;
-            handleArgs(args, data, len);
-            changeFreq(args);
-        } break;
-        case (ZERO_ALTIMETER): {
-            ZERO_ALTIMETER_ArgPack args;
-            handleArgs(args, data, len);
-            zeroAltimeter(args);
-        } break;
-        case (FORCE_ATOMICS): {
-            FORCE_ATOMICS_ArgPack args;
-            handleArgs(args, data, len);
-            forceAtomics(args);
-        } break;
+            Radio* radio = std::get<Radio*>(boundModules);
+            if(radio && handleArgs(args, data, len)){
+                return radio->changeFreq(args);
+            }
+            return false;
+        }
+        case (ZERO_ALTIMETER):
+        case (FORCE_ATOMICS):
+        default: return false;
     };
 }
 
@@ -78,12 +76,11 @@ bool Commands::checkValid(CommandID id, uint8_t* data, size_t len) {
 
 // Handles args and prevents de-ref null data pointer
 template <typename T>
-T Commands::handleArgs(T& args, uint8_t* data, size_t len){
+bool Commands::handleArgs(T& args, uint8_t* data, size_t len){
     if(!data){
-        args = {0};
+        return false;
     } else {
         memcpy(&args, data, len);
+        return true;
     }
-
-    return args;
 }
