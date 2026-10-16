@@ -6,6 +6,4 @@
 
 // Called on Telemetry thread
 void MRT_main(){
-
-    test_atomic_rules();
 }
