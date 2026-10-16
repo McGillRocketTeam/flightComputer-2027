@@ -60,7 +60,7 @@ class STM32HAL_Radios : public RadioLibHal {
         cfg.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(pinPort(interruptNum), &cfg);
 
-        setCallback(interruptNum, interruptCb);
+        setCallback(pinMask(interruptNum), interruptCb);
 
         // NVIC still has to be enabled for the corresponding EXTI line/IRQn —
         // CubeMX does this once if you set the pin to "GPIO_EXTI" mode in the
@@ -70,7 +70,7 @@ class STM32HAL_Radios : public RadioLibHal {
 
     void detachInterrupt(uint32_t interruptNum) override {
         HAL_GPIO_DeInit(pinPort(interruptNum), pinMask(interruptNum));
-        setCallback(interruptNum, nullptr);
+        setCallback(pinMask(interruptNum), nullptr);
     }
 
     // ---- timing ----
