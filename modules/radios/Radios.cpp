@@ -144,13 +144,18 @@ void Radio::transmit(){
 
     uint8_t data[len];
 
-
     if(telemetry){
         FrameBuilder* builder = telemetry->getASTRAFrame(header, data, len);
         len = builder->finalize(header.seq, header.flags, header.ack_id);
+
+        radio->startTransmit(data, len);
+    } else {
+        FrameHeaderPacket packet;
+        packet.data = header;
+
+        radio->startTransmit(packet.bytes, sizeof(FrameHeader));
     }
 
-    radio->startTransmit(data, len);
 }
 
 void Radio::receive(){
@@ -188,5 +193,5 @@ int16_t Radio::changeFreq(CHANGE_FREQ_ArgPack& args){
         // TODO: add Validation
          return radio->setFrequency(args.freq);
     }
-    return -1;
+    return RADIOLIB_ERR_UNKNOWN;
 }
