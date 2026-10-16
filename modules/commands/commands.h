@@ -16,9 +16,9 @@ class Commands {
     template <typename T>
     bool bindModule(T* module);
 
-    bool runCommand(CommandID command_code){return runCommand(command_code, nullptr, 0);};
+    uint16_t runCommand(CommandID command_code){return runCommand(command_code, nullptr, 0);};
 
-    bool runCommand(CommandID command_code, uint8_t* data, size_t len);
+    uint16_t runCommand(CommandID command_code, uint8_t* data, size_t len);
 
 
    private:

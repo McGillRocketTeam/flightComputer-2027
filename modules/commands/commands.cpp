@@ -18,7 +18,7 @@ void changeFreq(CHANGE_FREQ_ArgPack);
 void zeroAltimeter(ZERO_ALTIMETER_ArgPack);
 void forceAtomics(FORCE_ATOMICS_ArgPack);
 
-bool Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
+uint16_t Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
     if (!checkValid(command_code, data, len)) {
         printf("COMMAND INVALID\r\n");
         return false;
@@ -27,13 +27,13 @@ bool Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
     switch (command_code) {
         case (NO_OP):
             // No Op
-            return true;
+            return 0;
         case (RESET_AV):
             // STUBBED FOR NOW
             NVIC_SystemReset();
-            return true;
+            return 0;
         case (LAUNCH):
-            return true;
+            return 0;
         case (CHANGE_FREQ): {
             // As Examples of arg commands
             CHANGE_FREQ_ArgPack args;
@@ -41,11 +41,11 @@ bool Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
             if(radio && handleArgs(args, data, len)){
                 return radio->changeFreq(args);
             }
-            return false;
+            return -1;
         }
         case (ZERO_ALTIMETER):
         case (FORCE_ATOMICS):
-        default: return false;
+        default: return -1;
     };
 }
 
