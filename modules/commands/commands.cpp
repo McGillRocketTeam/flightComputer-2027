@@ -5,13 +5,14 @@
 
 template <typename T>
 bool Commands::bindModule(T* module){
-    T mod = std::get<T*>(boundModules);
+    T*& mod = std::get<T*>(boundModules);
 
-    if(!mod){
+    if(mod){
         return false;
     }
 
     mod = module;
+    return true;
 }
 
 void changeFreq(CHANGE_FREQ_ArgPack);
