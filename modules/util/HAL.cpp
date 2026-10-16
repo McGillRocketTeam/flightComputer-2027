@@ -45,5 +45,9 @@ void fireCallback(uint32_t interruptNum) {
         return;
     }
     InterruptBinding binding = s_extiCallbacks[interruptNum];
-    binding.callback(binding.context);
+
+    if(binding.callback)
+    {
+        binding.callback(binding.context);
+    }
 }
