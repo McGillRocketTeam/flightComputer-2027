@@ -3,10 +3,7 @@
 #include <stdint.h>
 
 #include <cstring>
-#include <functional>
-#include <map>
-#include <memory>
-#include <variant>
+
 
 // Mapping between all configured commands and their IDs
 // Used for readability, not technically necessary
