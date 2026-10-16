@@ -28,13 +28,10 @@ std::function<uint8_t*(Telemetry*)>
         fill_gps_debug_atomic,
 };
 
-FrameBuilder* Telemetry::getASTRAFrame(FrameHeader header) {
-    uint8_t buf[sizeof(FrameHeader) +
-                payload_length_from_bitmap(header.atomics_bitmap)];
-
+FrameBuilder* Telemetry::getASTRAFrame(FrameHeader header, uint8_t* buf, size_t bufLen) {
     // Reset the FrameBuilder, this allows us to change the buffer size
     builder.~FrameBuilder();
-    new (&builder) FrameBuilder(buf, sizeof(buf));
+    new (&builder) FrameBuilder(buf, bufLen);
 
     for (int i = 0; i < AT_TOTAL; i++) {
         if (header.atomics_bitmap & 1 << i) {

@@ -34,7 +34,7 @@ class Telemetry {
 
     void pollTelemetry();
 
-    FrameBuilder* getASTRAFrame(FrameHeader header);
+    FrameBuilder* getASTRAFrame(FrameHeader header, uint8_t* buf, size_t bufLen);
 
     FrameBuilder builder;
 
