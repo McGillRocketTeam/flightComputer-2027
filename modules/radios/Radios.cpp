@@ -5,9 +5,9 @@
 #include <util/helpers.h>
 
 Radio::Radio(FrequencyBand freq, Commands* commands)
-    : freq(freq)
+    : commands(commands)
+    , freq(freq)
     , stmHAL(RADIO_SPI)
-    , commands(commands)
     , mod(&stmHAL, 
         STM32_PIN(SX_CS_GPIO_Port, SX_CS_Pin),
         STM32_PIN(SX_DIO_GPIO_Port, SX_DIO_Pin),
@@ -124,6 +124,8 @@ void Radio::transmit(){
     header.ack_id = id_to_ack;
     header.seq = packet_counter;
 
+    header.flags = {0};
+
     uint32_t atomics = 0;
     for(int i = 0; i < AT_TOTAL; i++){
         if(atomicRules[i].get()){
@@ -132,14 +134,18 @@ void Radio::transmit(){
     }
 
     // Get ASTRA Payload from Telemetry if able, otherwise just send empty header
-    uint8_t* data = (uint8_t*)&header;
-    size_t len = sizeof(FrameHeader);
+    size_t header_len = sizeof(FrameHeader);
+
+    size_t payload_len = payload_length_from_bitmap(atomics);
+
+    size_t len = header_len + payload_len;
+
+    uint8_t data[len];
+
 
     if(telemetry){
-        FrameBuilder* builder = telemetry->getASTRAFrame(header);
+        FrameBuilder* builder = telemetry->getASTRAFrame(header, data, len);
         len = builder->finalize(header.seq, header.flags, header.ack_id);
-
-        data = builder->out;
     }
 
     radio->startTransmit(data, len);
@@ -173,4 +179,12 @@ void Radio::getReceived(){
     size_t args_len = len-1;
 
     commands->runCommand(id, args, args_len);
+}
+
+int16_t Radio::changeFreq(CHANGE_FREQ_ArgPack& args){
+    if(args.freq){
+        // TODO: add Validation
+         return radio->setFrequency(args.freq);
+    }
+    return -1;
 }

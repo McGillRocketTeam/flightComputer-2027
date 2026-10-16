@@ -63,11 +63,15 @@ class Radio{
         ack = true;
     }; 
 
+    int16_t changeFreq(CHANGE_FREQ_ArgPack& args);
+
     std::vector<AtomicRule> atomicRules;
 
     uint32_t packet_counter = 0;
 
     private:
+    Radio() = delete;
+
     AstraState state = AstraState::ASTRA_PREINIT;
 
     uint8_t cts_period = 4;
