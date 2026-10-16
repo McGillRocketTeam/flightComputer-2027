@@ -26,11 +26,11 @@ class Telemetry {
    public:
     Telemetry();
 
-    bool addCurrentSensor(CurrentSensor* sensor){this->currentSensor = sensor;};
-    bool addMagnetometer(Magnetometer* sensor){this->magnetometer = sensor;};
-    bool addGPS(GPS* sensor){this->gps = sensor;};
-    bool addIMU(IMU* sensor){this->imu = sensor;};
-    bool addSD(SDCard* sd_card){this->sd_card = sd_card;};
+    bool addCurrentSensor(CurrentSensor* sensor){this->currentSensor = sensor; return sensor;};
+    bool addMagnetometer(Magnetometer* sensor){this->magnetometer = sensor; return sensor;};
+    bool addGPS(GPS* sensor){this->gps = sensor; return sensor;};
+    bool addIMU(IMU* sensor){this->imu = sensor; return sensor;};
+    bool addSD(SDCard* sd_card){this->sd_card = sd_card; return sd_card;};
 
     void pollTelemetry();
 
