@@ -27,7 +27,7 @@ void setCallback(uint32_t interruptNum, void (*cb)()) {
 
 void setCallback(uint32_t interruptNum, void (*cbContextual)(void*),
                  void* context) {
-    if (interruptNum > 0 && interruptNum < NUM_INTERRUPTS) {
+    if (interruptNum > 0 && interruptNum < NUM_INTERRUPTS && cbContextual != nullptr) {
         s_extiCallbacks[interruptNum].callback = cbContextual;
         s_extiCallbacks[interruptNum].context = context;
     }
