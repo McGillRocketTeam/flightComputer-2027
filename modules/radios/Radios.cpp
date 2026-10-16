@@ -59,7 +59,7 @@ int16_t Radio::init(){
     }
 
     // Bind DIO interrupt so that it gives the semaphore
-    setCallback(STM32_PIN(SX_DIO_GPIO_Port,SX_DIO_Pin), &Radio::giveRadioSemaphoreTrampoline, this);
+    setCallback(__builtin_ctz(SX_DIO_Pin), &Radio::giveRadioSemaphoreTrampoline, this);
 
     radioSemaphore = xSemaphoreCreateBinaryStatic(&radioSemBuffer);
 
