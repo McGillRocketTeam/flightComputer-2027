@@ -5,12 +5,7 @@
 
 template <typename T>
 bool Commands::bindModule(T* module){
-    if(command_code < 0 || command_code >= NUM_COMMANDS){
-        // Reject Invalid Commands
-        return false;
-    }
-
-    mod = std::get<T*>(boundModules)
+    T mod = std::get<T*>(boundModules);
 
     if(!mod){
         return false;
