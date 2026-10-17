@@ -3,17 +3,7 @@
 #include <util/helpers.h>
 #include <radios/Radios.h>
 
-template <typename T>
-bool Commands::bindModule(T* module){
-    T*& mod = std::get<T*>(boundModules);
 
-    if(mod){
-        return false;
-    }
-
-    mod = module;
-    return true;
-}
 
 void changeFreq(CHANGE_FREQ_ArgPack);
 void zeroAltimeter(ZERO_ALTIMETER_ArgPack);
