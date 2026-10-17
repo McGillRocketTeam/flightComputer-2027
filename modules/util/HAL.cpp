@@ -33,10 +33,13 @@ void setCallback(uint32_t interruptNum, void (*cb)()) {
 
 void setCallback(uint32_t interruptNum, void (*cbContextual)(void*),
                  void* context) {
-    if (interruptNum > 0 && interruptNum < NUM_INTERRUPTS && cbContextual != nullptr) {
-        s_extiCallbacks[interruptNum].callback = cbContextual;
-        s_extiCallbacks[interruptNum].context = context;
+    if (interruptNum >= NUM_INTERRUPTS) {
+        return;
     }
+
+    s_extiCallbacks[interruptNum].callback = cbContextual;
+    s_extiCallbacks[interruptNum].context =
+        cbContextual ? context : nullptr;
 }
 
 void MRT_HAL_functionAsContext(void* ctx) {
@@ -47,7 +50,7 @@ void MRT_HAL_functionAsContext(void* ctx) {
 
 // Find and fire callback
 void fireCallback(uint32_t interruptNum) {
-    if (interruptNum <= 0 || interruptNum >= NUM_INTERRUPTS) {
+    if (interruptNum >= NUM_INTERRUPTS) {
         return;
     }
     InterruptBinding binding = s_extiCallbacks[interruptNum];
