@@ -22,6 +22,7 @@ void setCallback(uint32_t interruptNum, void (*cb)()) {
     // not need one becomes the context MRT_HAL_noContext takes in the context,
     // and executes it.
     if(cb == nullptr){
+        setCallback(interruptNum, nullptr, nullptr);
         return;
     }
 
