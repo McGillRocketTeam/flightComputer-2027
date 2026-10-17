@@ -150,6 +150,7 @@ void Radio::transmit(){
 
         radio->startTransmit(data, len);
     } else {
+        header.atomics_bitmap = 0;
         FrameHeaderPacket packet;
         packet.data = header;
 
