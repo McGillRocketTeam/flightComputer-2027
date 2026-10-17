@@ -17,7 +17,7 @@ class Commands {
     Commands() = default;
 
     template <typename T>
-    bool Commands::bindModule(T* module) {
+    bool bindModule(T* module) {
         T*& mod = std::get<T*>(boundModules);
 
         if (mod) {
