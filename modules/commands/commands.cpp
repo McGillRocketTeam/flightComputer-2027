@@ -12,7 +12,7 @@ void forceAtomics(FORCE_ATOMICS_ArgPack);
 uint16_t Commands::runCommand(CommandID command_code, uint8_t* data, size_t len){
     if (!checkValid(command_code, data, len)) {
         printf("COMMAND INVALID\r\n");
-        return 0;
+        return -1;
     }
 
     switch (command_code) {
