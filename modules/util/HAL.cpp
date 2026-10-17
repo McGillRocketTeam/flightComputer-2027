@@ -33,7 +33,7 @@ void setCallback(uint32_t interruptNum, void (*cb)()) {
 
 void setCallback(uint32_t interruptNum, void (*cbContextual)(void*),
                  void* context) {
-    if (interruptNum >= NUM_INTERRUPTS) {
+    if (interruptNum >= NUM_INTERRUPTS && interruptNum > 0) {
         return;
     }
 
