@@ -92,6 +92,9 @@ enum class NV_Param : uint8_t{
     NUM_PARAMS,
 };
 
+// In order to compile, the following arrays must list the enum values in EXACTLY ascending (declared) order
+
+// Addresses of each parameter
 static uint16_t nv_param_addresses [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::FLIGHT_STAGE]       = EEPROM_ADDR(0, EEPROM_B0, flight_stage),
     [(uint8_t) NV_Param::RADIO_FREQ]         = EEPROM_ADDR(0, EEPROM_B0, radio_freq),
@@ -118,9 +121,10 @@ static uint16_t nv_param_addresses [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::RTC_SUBSEC]         = EEPROM_ADDR(0, EEPROM_B2, rtc_subsec),
 };
 
+// Sizes of each parameter
 static uint8_t nv_param_sizes [(uint8_t) NV_Param::NUM_PARAMS]{
-    [(uint8_t) NV_Param::RADIO_FREQ]         = EEPROM_SIZE(EEPROM_B0, radio_freq),
     [(uint8_t) NV_Param::FLIGHT_STAGE]       = EEPROM_SIZE(EEPROM_B0, flight_stage),
+    [(uint8_t) NV_Param::RADIO_FREQ]         = EEPROM_SIZE(EEPROM_B0, radio_freq),
     [(uint8_t) NV_Param::RADIO_CR]           = EEPROM_SIZE(EEPROM_B0, radio_cr),
     [(uint8_t) NV_Param::RADIO_SF]           = EEPROM_SIZE(EEPROM_B0, radio_sf),
     [(uint8_t) NV_Param::RADIO_BW]           = EEPROM_SIZE(EEPROM_B0, radio_bw),
@@ -128,8 +132,8 @@ static uint8_t nv_param_sizes [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::FC_STATE_IWDG]      = EEPROM_SIZE(EEPROM_B0, fc_state_iwdg),
     [(uint8_t) NV_Param::FC_STATE_WU]        = EEPROM_SIZE(EEPROM_B0, fc_state_WU),
 
-    [(uint8_t) NV_Param::RECOV_ARMED]        = EEPROM_SIZE(EEPROM_B1, recov_armed),
     [(uint8_t) NV_Param::PROP_ARMED]         = EEPROM_SIZE(EEPROM_B1, prop_armed),
+    [(uint8_t) NV_Param::RECOV_ARMED]        = EEPROM_SIZE(EEPROM_B1, recov_armed),
     [(uint8_t) NV_Param::SD_OPEN]            = EEPROM_SIZE(EEPROM_B1, sd_open),
     [(uint8_t) NV_Param::CAMERA_REC]         = EEPROM_SIZE(EEPROM_B1, camera_rec),
     [(uint8_t) NV_Param::RECOV_PAD_ALTITUDE] = EEPROM_SIZE(EEPROM_B1, recov_pad_altitude),
