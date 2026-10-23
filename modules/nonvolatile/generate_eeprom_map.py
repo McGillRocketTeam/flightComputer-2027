@@ -1,6 +1,8 @@
 """Generates EEPROM Address & Size Maps, as well as Parameter struct from a list of parameters"""
 # 2026-10-23 Aneurin H
 
+# In order to add/remove/remap EEPROM parameters, edit the BLOCK variable here, and then run `pio run -t generate_eeprom_map`
+
 import sys
 from pprint import pprint
 from datetime import datetime
