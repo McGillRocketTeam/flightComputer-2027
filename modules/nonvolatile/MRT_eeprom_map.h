@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_eeprom_map.py)
-// Last Generated: 2026-10-23 12:13:49.540407
+// Last Generated: 2026-10-23 13:59:56.567759
 
 #pragma once
 #include <stdint.h>

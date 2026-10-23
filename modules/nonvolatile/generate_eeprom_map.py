@@ -164,9 +164,31 @@ def generate(params):
 
     return "\n".join(out) + "\n"
 
+"""Printout of EEPROM map"""
+def printReport(params):
+    print(f"[EEPROM MAP]")
+    print(f"  Num Blocks: {NUM_BLOCKS}, Block Size: {BLOCK_SIZE}, Page Size: {PAGE_SIZE}")
+    i = 0
+    b = -1
+    while b < NUM_BLOCKS and i < len(params):
+        if(b != params[i]['block']):
+            b = params[i]['block']
+            print(f"[Block {b}]")
+        print(f"  {params[i]['addr']:<{len(str(BLOCK_SIZE*NUM_BLOCKS))}} : {params[i]['name']}")
+        if(params[i]['size'] > 1):
+            j = 1
+            while j < params[i]['size']:
+                print(f"  {params[i]['addr'] + j:<{len(str(BLOCK_SIZE*NUM_BLOCKS))}} : {"/" if j == params[i]['size']-1 else "|"}")
+                j+=1
+        i+=1
+    print(f"[Total: {params[i-1]['addr'] + params[i-1]['size']-1}]")
 
 if __name__ == "__main__":
     with open(FILENAME, "w") as f:
-        f.write(generate(build_params()))
+        params = build_params()
+
+        printReport(params)
+
+        f.write(generate(params))
 
     # pprint(generate(build_params()))
