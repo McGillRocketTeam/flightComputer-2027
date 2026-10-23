@@ -13,7 +13,8 @@ PAGE_SIZE = 16
 SCRIPT_DIR = Path(__file__).parent
 FILENAME = SCRIPT_DIR / "MRT_eeprom_map.h"
 
-TYPE_SIZES = {"uint8_t"  : 1, 
+TYPE_SIZES = {"uint8_t"  : 1,
+              "char"     : 1, 
               "uint16_t" : 2, 
               "float"    : 4,
               "uint32_t" : 4}
@@ -43,7 +44,7 @@ BLOCKS = {
         ("rtc_second", "uint8_t"),
         ("rtc_subsec", "uint16_t"),
     ],
-    3: []}
+    3: [("TEST_PARAM", ("char", 5)),]}
 
 """Generates a list of overall parameters, where each entry is a dict containing name, type, block, size, blockoffset, and address"""
 def build_params():
@@ -56,14 +57,18 @@ def build_params():
         # Block relative offset
         offset = 0
         for name, type in fields:
-            size = TYPE_SIZES.get(type, 0)
+            if isinstance(type, tuple):
+                # TYPE IS AN ARRAY
+                size = TYPE_SIZES.get(type[0], 0) * type[1]
+            else:
+                size = TYPE_SIZES.get(type, 0)
 
             if(name in seen):
                 sys.exit(f"Parameter {name} has a duplicated entry")
             seen.add(name)
 
             if size < 1:
-                sys.exit(f"Parameter {name} has invalid or 0-size")
+                sys.exit(f"Parameter {name} has invalid or 0-size type")
 
             if((offset + size) > BLOCK_SIZE):
                 # Driver does not implement continuous writes beyond page boundaries, so data must remain in a single block
@@ -105,12 +110,27 @@ def generate(params):
 
     # Param struct creation
     w("// START PARAM STRUCT")
+    w("// Param Struct should not be used in implementation, it is provided as type reference")
     w("PACKED_STRUCT{")
+    b = -1
     for p in params:
-        w(f"    {p['type']:<{w_type}} {p['name']};")
+        if b != p['block']:
+            b = p['block']
+            if b > 0:
+                w("")
+            w(f"    // Block {b}")
+
+        if isinstance(p['type'], tuple):
+            w(f"    {p['type'][0]} {p['name']}[{p['type'][1]}];")
+        else:
+            w(f"    {p['type']:<{w_type}} {p['name']};")
 
     w(f"}} EEPROM_STRUCT;")
     w("// END PARAM STRUCT")
+    w("")
+
+    w("// Ensure struct cannot compile exceeding memory size. Generator does check this, this is redundancy")
+    w(f"static_assert(sizeof(EEPROM_STRUCT) <= EEPROM_SIZE_BYTES, \"EEPROM TOTAL MEMORY EXCEEDED: GENERATOR SHOULD HAVE PREVENTED THIS\");")
     w("")
 
     # Param Enum Generation

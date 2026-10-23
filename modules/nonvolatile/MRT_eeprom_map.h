@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_eeprom_map.py)
-// Last Generated: 2026-10-23 11:50:31.354911
+// Last Generated: 2026-10-23 12:11:44.981761
 
 #pragma once
 #include <stdint.h>
@@ -14,7 +14,9 @@ static_assert(EEPROM_SIZE_BYTES == 1024, "Generator Block Size does not match");
 static_assert(EEPROM_PAGE_SIZE == 16, "Generator Page Size does not match");
 
 // START PARAM STRUCT
+// Param Struct should not be used in implementation, it is provided as type reference
 PACKED_STRUCT{
+    // Block 0
     uint8_t  flight_stage;
     float    radio_freq;
     uint8_t  radio_cr;
@@ -23,6 +25,8 @@ PACKED_STRUCT{
     uint8_t  fc_state_reset;
     uint8_t  fc_state_iwdg;
     uint8_t  fc_state_WU;
+
+    // Block 1
     uint8_t  prop_armed;
     uint8_t  recov_armed;
     uint8_t  sd_open;
@@ -31,13 +35,21 @@ PACKED_STRUCT{
     uint32_t true_apogee_time;
     float    recov_pad_altitude;
     uint8_t  recov_flag;
+
+    // Block 2
     uint16_t rtc_day;
     uint8_t  rtc_hour;
     uint8_t  rtc_minute;
     uint8_t  rtc_second;
     uint16_t rtc_subsec;
+
+    // Block 3
+    char TEST_PARAM[5];
 } EEPROM_STRUCT;
 // END PARAM STRUCT
+
+// Ensure struct cannot compile exceeding memory size. Generator does check this, this is redundancy
+static_assert(sizeof(EEPROM_STRUCT) <= EEPROM_SIZE_BYTES, "EEPROM TOTAL MEMORY EXCEEDED: GENERATOR SHOULD HAVE PREVENTED THIS");
 
 // START PARAM ENUM
 enum class NV_Param : uint8_t {
@@ -62,6 +74,7 @@ enum class NV_Param : uint8_t {
     RTC_MINUTE,         // Block: 2
     RTC_SECOND,         // Block: 2
     RTC_SUBSEC,         // Block: 2
+    TEST_PARAM,         // Block: 3
     NUM_PARAMS,
 };
 // END PARAM ENUM
@@ -89,6 +102,7 @@ static uint16_t nv_param_addresses [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::RTC_MINUTE]          = 0x203,
     [(uint8_t) NV_Param::RTC_SECOND]          = 0x204,
     [(uint8_t) NV_Param::RTC_SUBSEC]          = 0x205,
+    [(uint8_t) NV_Param::TEST_PARAM]          = 0x300,
 };
 // END PARAM ADDRESS TABLE
 
@@ -115,6 +129,7 @@ static uint16_t nv_param_sizes [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::RTC_MINUTE]          = 1,
     [(uint8_t) NV_Param::RTC_SECOND]          = 1,
     [(uint8_t) NV_Param::RTC_SUBSEC]          = 2,
+    [(uint8_t) NV_Param::TEST_PARAM]          = 5,
 };
 // END PARAM SIZE TABLE
 
