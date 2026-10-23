@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#define PAGE_SIZE 16
+#define PAGE_SIZE EEPROM_PAGE_SIZE
 #define BLOCK_SIZE (EEPROM_SIZE_BYTES / EEPROM_NUM_BLOCKS)
 
 extern I2C_HandleTypeDef hi2c2;
