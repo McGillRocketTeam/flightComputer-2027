@@ -183,7 +183,7 @@ def printReport(params):
                 print(f"  {params[i]['addr'] + j:<{len(str(BLOCK_SIZE*NUM_BLOCKS))}} : {"/" if j == params[i]['size']-1 else "|"}")
                 j+=1
         i+=1
-    print(f"[Total: {params[i-1]['addr'] + params[i-1]['size']-1}]")
+    print(f"[Size: {sum(d["size"] for d in params)}][Stride: {params[i-1]['addr'] + params[i-1]['size'] - 1}]")
 
 if __name__ == "__main__":
     with open(FILENAME, "w") as f:
