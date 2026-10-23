@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_eeprom_map.py)
-// Last Generated: 2026-10-23 12:11:44.981761
+// Last Generated: 2026-10-23 12:13:49.540407
 
 #pragma once
 #include <stdint.h>
@@ -42,9 +42,6 @@ PACKED_STRUCT{
     uint8_t  rtc_minute;
     uint8_t  rtc_second;
     uint16_t rtc_subsec;
-
-    // Block 3
-    char TEST_PARAM[5];
 } EEPROM_STRUCT;
 // END PARAM STRUCT
 
@@ -74,7 +71,6 @@ enum class NV_Param : uint8_t {
     RTC_MINUTE,         // Block: 2
     RTC_SECOND,         // Block: 2
     RTC_SUBSEC,         // Block: 2
-    TEST_PARAM,         // Block: 3
     NUM_PARAMS,
 };
 // END PARAM ENUM
@@ -102,7 +98,6 @@ static uint16_t nv_param_addresses [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::RTC_MINUTE]          = 0x203,
     [(uint8_t) NV_Param::RTC_SECOND]          = 0x204,
     [(uint8_t) NV_Param::RTC_SUBSEC]          = 0x205,
-    [(uint8_t) NV_Param::TEST_PARAM]          = 0x300,
 };
 // END PARAM ADDRESS TABLE
 
@@ -129,7 +124,6 @@ static uint16_t nv_param_sizes [(uint8_t) NV_Param::NUM_PARAMS]{
     [(uint8_t) NV_Param::RTC_MINUTE]          = 1,
     [(uint8_t) NV_Param::RTC_SECOND]          = 1,
     [(uint8_t) NV_Param::RTC_SUBSEC]          = 2,
-    [(uint8_t) NV_Param::TEST_PARAM]          = 5,
 };
 // END PARAM SIZE TABLE
 

@@ -44,7 +44,7 @@ BLOCKS = {
         ("rtc_second", "uint8_t"),
         ("rtc_subsec", "uint16_t"),
     ],
-    3: [("TEST_PARAM", ("char", 5)),]}
+    3: []}
 
 """Generates a list of overall parameters, where each entry is a dict containing name, type, block, size, blockoffset, and address"""
 def build_params():
@@ -121,7 +121,7 @@ def generate(params):
             w(f"    // Block {b}")
 
         if isinstance(p['type'], tuple):
-            w(f"    {p['type'][0]} {p['name']}[{p['type'][1]}];")
+            w(f"    {p['type'][0]:<{w_type}} {p['name']}[{p['type'][1]}];")
         else:
             w(f"    {p['type']:<{w_type}} {p['name']};")
 
