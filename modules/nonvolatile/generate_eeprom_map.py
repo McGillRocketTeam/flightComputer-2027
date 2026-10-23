@@ -149,7 +149,7 @@ def generate(params):
     w("// START PARAM ADDRESS TABLE")
     w("static uint16_t nv_param_addresses [(uint8_t) NV_Param::NUM_PARAMS]{")
     for p in params:
-        w(f"    [(uint8_t) NV_Param::{p['name'].upper()}] " + " " * (w_name-len(p['name'])) + f" = 0x{p['addr']:X},")
+        w(f"    [(uint8_t) NV_Param::{p['name'].upper()}] " + " " * (w_name-len(p['name'])) + f"= 0x{p['addr']:X},")
     w("};")
     w("// END PARAM ADDRESS TABLE")
     w("")
@@ -158,7 +158,7 @@ def generate(params):
     w("// START PARAM SIZE TABLE")
     w("static uint16_t nv_param_sizes [(uint8_t) NV_Param::NUM_PARAMS]{")
     for p in params:
-        w(f"    [(uint8_t) NV_Param::{p['name'].upper()}] " + " " * (w_name-len(p['name'])) + f" = {p['size']},")
+        w(f"    [(uint8_t) NV_Param::{p['name'].upper()}] " + " " * (w_name-len(p['name'])) + f"= {p['size']},")
     w("};")
     w("// END PARAM SIZE TABLE")
     w("")
