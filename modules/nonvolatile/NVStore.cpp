@@ -61,8 +61,10 @@ STATUS_NVSTORE NVStore::saveAll(){
     STATUS_NVSTORE res = NVSTORE_OK;
 
     for(uint8_t i = 0; i < (uint8_t) NV_Param::NUM_PARAMS; i++){
-        if(writeParameterRaw((NV_Param)i, volatile_locations[i])){
-            res = NVSTORE_ERROR;
+        if(volatile_locations[i]){
+            if(writeParameterRaw((NV_Param)i, volatile_locations[i])){
+                res = NVSTORE_ERROR;
+            }
         }
     }
 
