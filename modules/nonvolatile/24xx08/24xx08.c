@@ -55,7 +55,7 @@ status_24xx08_t write_page(uint16_t addr, const uint8_t* data, size_t len) {
 
         uint32_t start_time = HAL_GetTick();
 
-        while(HAL_I2C_IsDeviceReady(I2C_BUS_24xx08, dw.dev_addr, 1, 2)) {
+        while(!HAL_I2C_IsDeviceReady(I2C_BUS_24xx08, dw.dev_addr, 1, 2)) {
             if(HAL_GetTick() - start_time > 10) {return STATUS_24xx08_TIMEOUT;}
             // While the device is not ready, check again, until timeout has expired
             // TODO: Replace when implementing DMA
