@@ -6,4 +6,8 @@
 
 // Called on Telemetry thread
 void MRT_main(){
+    NVStore store{};
+
+    bool status = true;
+    store.writeParameter(NV_Param::CAMERA_REC, status);
 }
