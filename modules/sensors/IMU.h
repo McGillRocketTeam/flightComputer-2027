@@ -11,14 +11,26 @@ public:
     IMU(stmdev_ctx_t context, DelayFunction delay);
 
     void init() override;
+    // Synchronous: call directly from an ISR only with ISR-safe bus callbacks.
+    // Otherwise notify a task to poll. Serialize poll/getters across contexts.
     void poll() override;
 
     ErrorCode status() override;
     bool isInitialized() override;
 
+    // Cached X/Y/Z in mg and mdps; temperature in degrees Celsius.
     const float* getAcceleration() const;
     const float* getAngularRate() const;
     float getTemperature() const;
+    const int16_t* getRawAcceleration() const { return data_raw_acceleration; }
+    const int16_t* getRawAngularRate() const { return data_raw_angular_rate; }
+    int16_t getRawTemperature() const { return data_raw_temperature; }
+
+    enum Field : uint8_t { ACCELERATION = 1, ANGULAR_RATE = 2, TEMPERATURE = 4 };
+    // Valid fields have been collected since init; updated fields belong to
+    // the last poll. Different sensors may become ready independently.
+    uint8_t getValidFields() const { return validFields_; }
+    uint8_t getUpdatedFields() const { return updatedFields_; }
 
 private:
 	//holds the bus callbacks and contex handle
@@ -34,6 +46,8 @@ private:
     int16_t data_raw_angular_rate[3]{};
     int16_t data_raw_temperature = 0;
 
+    uint8_t validFields_ = 0;
+    uint8_t updatedFields_ = 0;
     bool initialized_ = false;
     ErrorCode error_ = ERROR;
 };
