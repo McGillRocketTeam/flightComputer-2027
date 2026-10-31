@@ -21,9 +21,11 @@ public:
     float getTemperature() const;
 
 private:
+	//holds the bus callbacks and contex handle
     stmdev_ctx_t context_{};
+	//let initialization wait without tying the class directly to a particular timing API.
     DelayFunction delay_;
-
+	
     float acceleration_mg[3]{};
     float angular_rate_mdps[3]{};
     float temperature_degC = 0.0f;
