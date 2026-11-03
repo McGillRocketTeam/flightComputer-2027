@@ -2,6 +2,8 @@
 #include <util/HAL.h>
 
 #ifdef __cplusplus
+#include <nonvolatile/NVStore.h>
+
 extern "C" {
 #endif
 
