@@ -46,7 +46,9 @@ BLOCKS = {
         ("rtc_second", "uint8_t"),
         ("rtc_subsec", "uint16_t"),
     ],
-    3: []}
+    3: [("seq_num", "uint16_t"),
+        ("ack_id", "uint8_t"),
+    ]}
 
 """Generates a list of overall parameters, where each entry is a dict containing name, type, block, size, blockoffset, and address"""
 def build_params():
