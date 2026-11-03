@@ -1,7 +1,6 @@
 // AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_sd_data.py)
-// Last Generated: 2026-11-02 20:05:55.208076
+// Last Generated: 2026-11-02 21:37:53.600608
 
-#pragma once
 #include "modules/sd_card/data/MRT_sd_data.h"
 
 const uint16_t SD_AT_SIZE[SD_AT_TOTAL]{

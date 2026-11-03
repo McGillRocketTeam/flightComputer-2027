@@ -176,7 +176,6 @@ def generateCPP(params, flags):
     w("// AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_sd_data.py)")
     w(f"// Last Generated: {datetime.now()}")
     w("")
-    w("#pragma once")
     w(f"#include \"modules/sd_card/data/{FILENAME}.h\"")
     w("")
     w("const uint16_t SD_AT_SIZE[SD_AT_TOTAL]{")
