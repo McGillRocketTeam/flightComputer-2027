@@ -113,6 +113,8 @@ bool SDCard::packet(uint16_t bitmask){
                 case SD_AT_FLAGS:
                     fb.addAtomic_SD(i, &flags_atomic, sizeof(flags_atomic));
                     break;
+                default:
+                    break;
             };
         }
     }
@@ -150,6 +152,8 @@ ERROR_SDCARD SDCard::fill(uint16_t bitmask){
                     break;
                 case SD_AT_FLAGS:
                     fill_flags(flags_ptr, flags_atomic);
+                    break;
+                default:
                     break;
             }
         }
