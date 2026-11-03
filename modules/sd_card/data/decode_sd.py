@@ -119,8 +119,11 @@ if __name__ == "__main__":
         data = yaml.safe_load(stream)
     if(len(sys.argv) == 1):
         raise ValueError("Provide SD File Argument")
-    with open(sys.argv[1], 'rb') as sd_data:
-        file_bytes = sd_data.read()
-
+    try:
+        with open(sys.argv[1], 'rb') as sd_data:
+            file_bytes = sd_data.read()
+    except FileNotFoundError:
+        print("SD File Not Found")
+        exit(1)
     paramList, flags = listParams(data)
     parse(paramList, flags, file_bytes, sys.argv[1])
