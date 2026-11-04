@@ -1,0 +1,96 @@
+---
+  version : 0
+  missions : [ two_stage, tech_dev ]
+
+  # Example Field
+  # NAME
+  # type : (REQUIRED)
+  # units : (Optional) (Units for parsed output)
+  # add_offset : X (Optional) (Default is 0)
+  # scale : X (Optional) (Default is 1) (This is the scale at which the data is saved)
+  # Decoding is as follows: Proper Value = (Saved value / scale) + add_offset
+  # Flags are aggregated to save bytes
+
+  atomics: 
+    flight:
+      fields:
+        - {name: flight_stage, type: uint8, units: ENUM}
+        - {name: alt_agl, type: float, units: ft}
+        - {name: alt_asl, type: float, units: ft}
+        - {name: vertical_speed, type: float, units: ft/s}
+        - {name: apogee, type: float, units: ft}
+        - {name: main_alt, type: float, units: ft}
+        - {name: booster_burnout_alt, type: float, units: ft}
+
+    fc:
+      fields:
+        - {name: time_since_sw_reset, type: uint32, scale: 1000, units: s}
+        - {name: battery_voltage, type: uint8, scale: 10, units: V}
+        - {name: current_draw, type: uint8, units: mA}
+        - {name: time_since_radio_contact, type: uint32, scale: 1000, units: s}
+        - {name: radio_frequency, type: uint16, units: MHz}
+
+      flags:
+        - CAN_bus_active
+        - camera_recording
+
+    gps:
+      fields:
+        - {name: gps_lat, type: int32, scale: 1000000, units: deg}
+        - {name: gps_long, type: int32, scale: 1000000, units: deg}
+        - {name: gps_alt, type: uint16, scale: 0.001, units: m}
+        - {name: time_since_fix, type: uint32, scale: 0.001, units: s}
+
+      flags:
+        - gps_fix
+
+    barometer:
+      fields:
+        - {name: baro_pressure, type: float}
+        - {name: baro_temp, type: uint8}
+
+    imu: 
+      fields:
+        - {name: accel_x, type: int16, scale: 0.001, units: g}
+        - {name: accel_y, type: int16, scale: 0.001, units: g}
+        - {name: accel_z, type: int16, scale: 0.001, units: g}
+        - {name: gyro_x, type: int16, scale: 0.001, units: deg/s}
+        - {name: gyro_y, type: int16, scale: 0.001, units: deg/s}
+        - {name: gyro_z, type: int16, scale: 0.001, units: deg/s}
+
+    magnetometer:
+      fields:
+        - {name: mag_x, type: int16, scale: 0.001, units: gauss}
+        - {name: mag_y, type: int16, scale: 0.001, units: gauss}
+        - {name: mag_z, type: int16, scale: 0.001, units: gauss}
+
+    recovery: 
+      flags:
+        - recovery_armed
+        - main_armed
+        - main_energized
+        - main_continuity
+        - drogue_armed
+        - drogue_energized
+        - drogue_continuity
+      missions: [two_stage]
+
+    propulsion:
+      fields:
+        - {name: tank_top_pressure, type: uint16, units: psi}
+        - {name: tank_bot_pressure, type: uint16, units: psi}
+        - {name: tank_top_temp, type: int8, units: C}
+        - {name: tank_bot_temp, type: int8, units: C}
+      flags:
+        - propulsion_armed
+        - propulsion_on
+        - mov_armed
+        - mov_energized
+        - mov_continuity
+        - fdov_armed
+        - fdov_energized
+        - fdov_continuity
+        - vent_armed
+        - vent_energized
+        - vent_continuity
+      missions: [tech_dev]
