@@ -1,11 +1,13 @@
 #pragma once
 
-#include "sensors/Sensor.h"
-#include "drivers/lsm6dsr/lsm6dsr_reg.h"
 #include <cstdint>
 
+#include "drivers/lsm6dsr/lsm6dsr_reg.h"
+#include "i2c.h"
+#include "sensors/Sensor.h"
+
 class IMU : public Sensor {
-public:
+   public:
     using DelayFunction = void (*)(uint32_t milliseconds);
 
     IMU(stmdev_ctx_t context, DelayFunction delay);
@@ -26,18 +28,23 @@ public:
     const int16_t* getRawAngularRate() const { return data_raw_angular_rate; }
     int16_t getRawTemperature() const { return data_raw_temperature; }
 
-    enum Field : uint8_t { ACCELERATION = 1, ANGULAR_RATE = 2, TEMPERATURE = 4 };
+    enum Field : uint8_t {
+        ACCELERATION = 1,
+        ANGULAR_RATE = 2,
+        TEMPERATURE = 4
+    };
     // Valid fields have been collected since init; updated fields belong to
     // the last poll. Different sensors may become ready independently.
     uint8_t getValidFields() const { return validFields_; }
     uint8_t getUpdatedFields() const { return updatedFields_; }
 
-private:
-	//holds the bus callbacks and contex handle
+   private:
+    // holds the bus callbacks and contex handle
     stmdev_ctx_t context_{};
-	//let initialization wait without tying the class directly to a particular timing API.
+    // let initialization wait without tying the class directly to a particular
+    // timing API.
     DelayFunction delay_;
-	
+
     float acceleration_mg[3]{};
     float angular_rate_mdps[3]{};
     float temperature_degC = 0.0f;
@@ -51,3 +58,8 @@ private:
     bool initialized_ = false;
     ErrorCode error_ = ERROR;
 };
+
+int32_t lsm6dsr_i2c_write_ctx(void* handle, uint8_t reg,
+                                         const uint8_t* bufp, uint16_t len);
+int32_t lsm6dsr_i2c_read_ctx(void* handle, uint8_t reg,
+                                          uint8_t* bufp, uint16_t len);

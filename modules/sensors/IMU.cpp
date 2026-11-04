@@ -204,3 +204,31 @@ void IMU::poll() {
     validFields_ |= updatedFields_;
     error_ = NOMINAL;
 }
+
+
+// Static Context Functions
+int32_t lsm6dsr_i2c_read_ctx(void *handle, uint8_t reg,
+                             uint8_t *bufp, uint16_t len)
+{
+    I2C_HandleTypeDef *hi2c = (I2C_HandleTypeDef *)handle;
+
+    HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c, LSM6DSR_I2C_ADD_L, reg, I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+
+    if (status != HAL_OK) {
+        return -1;
+    }
+    return 0;
+}
+
+int32_t lsm6dsr_i2c_write_ctx(void *handle, uint8_t reg,
+                              const uint8_t *bufp, uint16_t len)
+{
+    I2C_HandleTypeDef *hi2c = (I2C_HandleTypeDef *)handle;
+
+    if (HAL_I2C_Mem_Write(hi2c, LSM6DSR_I2C_ADD_L, reg,
+                          I2C_MEMADD_SIZE_8BIT,
+                          (uint8_t *)bufp, len, 1000) != HAL_OK) {
+        return -1;
+    }
+    return 0;
+}

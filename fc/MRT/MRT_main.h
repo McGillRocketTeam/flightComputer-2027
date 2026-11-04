@@ -1,5 +1,6 @@
 #pragma once 
 #include <util/HAL.h>
+#include "MRT_setup.h"
 
 #ifdef __cplusplus
 extern "C" {
