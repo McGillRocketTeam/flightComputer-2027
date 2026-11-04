@@ -8,5 +8,6 @@ env.Append(
     LINKFLAGS=[
         "-mfloat-abi=hard",
         "-mfpu=fpv4-sp-d16",
+        # "-u,_printf_float",
     ]
 )

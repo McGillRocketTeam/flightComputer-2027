@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 #include "drivers/lsm6dsr/lsm6dsr_reg.h"
 #include "i2c.h"
 #include "sensors/Sensor.h"

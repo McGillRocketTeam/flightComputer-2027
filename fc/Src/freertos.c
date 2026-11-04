@@ -95,6 +95,19 @@ void vApplicationDaemonTaskStartupHook(void);
 /* USER CODE BEGIN DAEMON_TASK_STARTUP_HOOK */
 void vApplicationDaemonTaskStartupHook(void)
 {
+    setup_IMU();
+
+      /* creation of Telemetry */
+  TelemetryHandle = osThreadNew(StartTelemetry, NULL, &Telemetry_attributes);
+
+  /* creation of Radio */
+  RadioHandle = osThreadNew(StartRadio, NULL, &Radio_attributes);
+
+  /* creation of Watchdog */
+  WatchdogHandle = osThreadNew(StartWatchdog, NULL, &Watchdog_attributes);
+
+  /* creation of CAN */
+  CANHandle = osThreadNew(StartCAN, NULL, &CAN_attributes);
 }
 /* USER CODE END DAEMON_TASK_STARTUP_HOOK */
 
@@ -123,6 +136,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  #ifdef THREADS_NOT_HERE
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -140,6 +154,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  #endif
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

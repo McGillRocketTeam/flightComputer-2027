@@ -1,5 +1,8 @@
 #include "MRT_setup.h"
 
+static stmdev_ctx_t ctx = {lsm6dsr_i2c_write_ctx, lsm6dsr_i2c_read_ctx, &hi2c2};
+IMU imu{ctx, HAL_Delay};
+
 void MRT_terminalPrint(terminal_label label, const char* peripheral, const char* state, const char* information) {
 
     if (label == INFO) {
@@ -27,6 +30,28 @@ void MRT_terminalPrint(terminal_label label, const char* peripheral, const char*
     println(information);
 }
 
+extern "C" void setup_IMU(){
+    HAL_GPIO_WritePin(SENSOR_PWR_EN_GPIO_Port, SENSOR_PWR_EN_Pin, GPIO_PIN_SET);
+    if (HAL_GPIO_ReadPin(SENSOR_PWR_EN_GPIO_Port, SENSOR_PWR_EN_Pin) != GPIO_PIN_SET) {
+        MRT_terminalPrint(PERIPHERAL, "GPIO", "FAILED", "GPIO set of SENSOR_PWR_EN failed");
+    }
+
+    osDelay(500);
+
+    imu.init();
+
+    Sensor::ErrorCode status = imu.status();
+
+    printf("Status: %d", status);
+
+    if (status == Sensor::ErrorCode::NOMINAL) {
+        MRT_terminalPrint(PERIPHERAL, "IMU", "OK", "");
+    } else if (status == Sensor::ErrorCode::SENSOR_NOT_PRESENT) {
+        MRT_terminalPrint(PERIPHERAL, "IMU", "FAILED", "SENSOR NOT PRESENT");
+    } else {
+        MRT_terminalPrint(PERIPHERAL, "IMU", "FAILED", "Initialization error");
+    }
+}
 
 void I2C_busy_bit_fix(void) {
     // Write pin for all 3 sensors on the line

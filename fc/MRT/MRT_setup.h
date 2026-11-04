@@ -1,8 +1,7 @@
 #pragma once
 #include "util/helpers.h"
-#include "stm32f427xx.h"
-#include "i2c.h"
-#include "gpio.h"
+#include "cmsis_os.h"
+
 
 // ANSI COLORS
 #define ANSI_COLOR_RESET   "\x1b[0m"
@@ -31,6 +30,23 @@ typedef enum terminal_label { INFO, COMMAND, CAN, PERIPHERAL, STATE_R } terminal
 void MRT_setup();
 
 // I2C fix for busy bit
+#ifdef __cplusplus
+
+extern "C" {
+#endif
+
+#include <stdbool.h>
 void I2C_busy_bit_fix(void);
+
+void setup_IMU();
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+#include "sensors/IMU.h"
+extern IMU imu;
+#endif
 
 void MRT_terminalPrint(terminal_label label, const char* peripheral, const char* state, const char* information);
