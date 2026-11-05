@@ -26,7 +26,9 @@
  *  @{
  */
 
-#include "stdbool.h"
+#include <stdbool.h> // booleans
+#include <stddef.h>  // size_t
+#include <stdint.h>  // uint16_t, etc.
 
 /** @file
  * @brief This header file defines the UBX protocol API, intended to
@@ -52,7 +54,8 @@ extern "C" {
  * of CRC). Must be added to the encoded message length to obtain
  * the required encode buffer size.
  */
-#define U_UBX_PROTOCOL_OVERHEAD_LENGTH_BYTES (U_UBX_PROTOCOL_HEADER_LENGTH_BYTES + 2)
+#define U_UBX_PROTOCOL_OVERHEAD_LENGTH_BYTES                                   \
+    (U_UBX_PROTOCOL_HEADER_LENGTH_BYTES + 2)
 
 /* ----------------------------------------------------------------
  * TYPES
@@ -150,8 +153,8 @@ uint64_t uUbxProtocolUint64Encode(uint64_t uint64);
  *                                to pBuffer, else negative error code.
  */
 int32_t uUbxProtocolEncode(int32_t messageClass, int32_t messageId,
-                           const char *pMessageBody, size_t messageBodyLengthBytes,
-                           char *pBuffer);
+                           const char *pMessageBody,
+                           size_t messageBodyLengthBytes, char *pBuffer);
 
 /** Decode a UBX protocol message.  Call this function with a buffer
  * and it will return the first valid UBX format message it finds

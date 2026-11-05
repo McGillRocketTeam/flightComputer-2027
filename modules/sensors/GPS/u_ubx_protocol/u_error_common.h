@@ -38,7 +38,7 @@
  * if you wish.
  */
 #ifndef U_ERROR_BASE
-# define U_ERROR_BASE 0
+#define U_ERROR_BASE 0
 #endif
 
 /* ----------------------------------------------------------------
