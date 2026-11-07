@@ -1,9 +1,26 @@
 #include "sensors/IMU.h"
+#include "stm32f4xx_hal.h"
 
-IMU::IMU(stmdev_ctx_t context, DelayFunction delay)
-    : context_(context), delay_(delay) {}
+namespace {
+constexpr uint32_t BUS_TIMEOUT_MS = 100;
+constexpr uint16_t DEVICE_ADDRESS = LSM6DSR_I2C_ADD_L & 0xFEu;
 
-//Getters 
+int32_t readRegisters(void* handle, uint8_t reg, uint8_t* data, uint16_t length) {
+    return HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(handle), DEVICE_ADDRESS,
+                            reg, I2C_MEMADD_SIZE_8BIT, data, length, BUS_TIMEOUT_MS);
+}
+
+int32_t writeRegisters(void* handle, uint8_t reg, const uint8_t* data, uint16_t length) {
+    return HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(handle), DEVICE_ADDRESS,
+                             reg, I2C_MEMADD_SIZE_8BIT, const_cast<uint8_t*>(data),
+                             length, BUS_TIMEOUT_MS);
+}
+} // namespace
+
+IMU::IMU(I2C_HandleTypeDef* bus, DelayFunction delay)
+    : context_{writeRegisters, readRegisters, bus}, delay_(delay) {}
+
+//Getters
 const float* IMU::getAcceleration() const {
     return acceleration_mg;
 }
@@ -27,7 +44,7 @@ bool IMU::isInitialized() {
 
 
 void IMU::init() {
-    // 1. Validate the bus callbacks and delay function.
+    // 1. Validate the I2C handle and delay function.
     initialized_ = false;
     validFields_ = 0;
     updatedFields_ = 0;
@@ -40,11 +57,11 @@ void IMU::init() {
 
     error_ = ERROR;
 
-    if (!context_.write_reg || !context_.read_reg || !delay_) {
+    if (!context_.handle || !delay_) {
         return;
-    }//Here it checks if the pointers are null, if the pointers are null, well, there is no sensors.
-    // Correction: null callbacks mean missing software dependencies,
-    // not necessarily a missing sensor. Keep error_ set to ERROR.
+    }
+    // The adapters are fixed in the constructor; null dependencies are a
+    // software setup error, not evidence that the sensor is absent.
 
     // 2. Wait for the sensor to boot.
     delay_(100);

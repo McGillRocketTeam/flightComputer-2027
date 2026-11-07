@@ -3,16 +3,17 @@
 #include "sensors/Sensor.h"
 #include "drivers/lsm6dsr/lsm6dsr_reg.h"
 #include <cstdint>
+#include "stm32f4xx_hal.h"
 
 class IMU : public Sensor {
 public:
     using DelayFunction = void (*)(uint32_t milliseconds);
 
-    IMU(stmdev_ctx_t context, DelayFunction delay);
+    IMU(I2C_HandleTypeDef* bus, DelayFunction delay);
 
     void init() override;
-    // Synchronous: call directly from an ISR only with ISR-safe bus callbacks.
-    // Otherwise notify a task to poll. Serialize poll/getters across contexts.
+    // Blocking HAL I2C: call from task/main context, never directly from an ISR.
+    // An ISR should notify the task that polls. Serialize init/poll/getters.
     void poll() override;
 
     ErrorCode status() override;
@@ -37,7 +38,7 @@ private:
     stmdev_ctx_t context_{};
 	//let initialization wait without tying the class directly to a particular timing API.
     DelayFunction delay_;
-	
+
     float acceleration_mg[3]{};
     float angular_rate_mdps[3]{};
     float temperature_degC = 0.0f;
