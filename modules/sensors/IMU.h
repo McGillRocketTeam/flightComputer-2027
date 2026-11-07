@@ -34,6 +34,7 @@ public:
     uint8_t getUpdatedFields() const { return updatedFields_; }
 
 private:
+    bool check(int32_t result, ErrorCode failure);
 	//holds the bus callbacks and contex handle
     stmdev_ctx_t context_{};
 	//let initialization wait without tying the class directly to a particular timing API.
@@ -50,5 +51,5 @@ private:
     uint8_t validFields_ = 0;
     uint8_t updatedFields_ = 0;
     bool initialized_ = false;
-    ErrorCode error_ = ERROR;
+    ErrorCode error_ = SENSOR_NOT_INITIALIZED;
 };
