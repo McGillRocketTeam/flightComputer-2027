@@ -27,16 +27,40 @@ IMU::IMU(I2C_HandleTypeDef* bus, DelayFunction delay)
     : context_{writeRegisters, readRegisters, bus}, delay_(delay) {}
 
 //Getters
-const float* IMU::getAcceleration() const {
-    return acceleration_mg;
+bool IMU::getAcceleration(float (&output)[3]) const {
+    if (!(validFields_ & ACCELERATION)) return false;
+    std::copy_n(acceleration_mg, 3, output);
+    return true;
 }
 
-const float* IMU::getAngularRate() const {
-    return angular_rate_mdps;
+bool IMU::getAngularRate(float (&output)[3]) const {
+    if (!(validFields_ & ANGULAR_RATE)) return false;
+    std::copy_n(angular_rate_mdps, 3, output);
+    return true;
 }
 
-float IMU::getTemperature() const {
-    return temperature_degC;
+bool IMU::getTemperature(float& output) const {
+    if (!(validFields_ & TEMPERATURE)) return false;
+    output = temperature_degC;
+    return true;
+}
+
+bool IMU::getRawAcceleration(int16_t (&output)[3]) const {
+    if (!(validFields_ & ACCELERATION)) return false;
+    std::copy_n(data_raw_acceleration, 3, output);
+    return true;
+}
+
+bool IMU::getRawAngularRate(int16_t (&output)[3]) const {
+    if (!(validFields_ & ANGULAR_RATE)) return false;
+    std::copy_n(data_raw_angular_rate, 3, output);
+    return true;
+}
+
+bool IMU::getRawTemperature(int16_t& output) const {
+    if (!(validFields_ & TEMPERATURE)) return false;
+    output = data_raw_temperature;
+    return true;
 }
 
 bool IMU::check(int32_t result, ErrorCode failure) {
@@ -199,6 +223,7 @@ void IMU::init() {
 }
 
 void IMU::poll() {
+    validFields_ = 0;
     updatedFields_ = 0;
     if (!initialized_) {
         // Preserve the initialization failure reported by init().
@@ -210,7 +235,7 @@ void IMU::poll() {
         return;
     }
 
-    // No fresh data is normal between output periods, not a bus failure.
+    // No fresh data is normal; all getters remain unavailable for this poll.
     if (!ready.xlda && !ready.gda && !ready.tda) {
         error_ = NOMINAL;
         return;
@@ -231,14 +256,14 @@ void IMU::poll() {
     // 2. Convert the raw data to physical units.
     // These conversions match the fixed ranges selected by init().
     if (ready.xlda) {
-        for (unsigned axis = 0; axis < 3; ++axis) {
+        for (uint8_t axis = 0; axis < 3; axis++) {
             data_raw_acceleration[axis] = acceleration[axis];
             acceleration_mg[axis] = lsm6dsr_from_fs16g_to_mg(acceleration[axis]);
         }
         updatedFields_ |= ACCELERATION;
     }
     if (ready.gda) {
-        for (unsigned axis = 0; axis < 3; ++axis) {
+        for (uint8_t axis = 0; axis < 3; axis++) {
             data_raw_angular_rate[axis] = angularRate[axis];
             angular_rate_mdps[axis] = lsm6dsr_from_fs2000dps_to_mdps(angularRate[axis]);
         }
@@ -249,6 +274,6 @@ void IMU::poll() {
         temperature_degC = lsm6dsr_from_lsb_to_celsius(temperature);
         updatedFields_ |= TEMPERATURE;
     }
-    validFields_ |= updatedFields_;
+    validFields_ = updatedFields_;
     error_ = NOMINAL;
 }
