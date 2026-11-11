@@ -1,8 +1,8 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 
-#include "sensors/GPS/gps_driver.h"
-#include "sensors/Sensor.h"
+#include "drivers/gps/gps_driver.h"
+#include "Sensor.h"
 
 struct GPSPosition {
     float latitude;
@@ -18,13 +18,13 @@ struct GPSTime {
 
 class GPS : Sensor {
   public:
-    explicit GPS(const gps_config_t &config);
+    explicit GPS();
     ~GPS() = default;
 
     void init() override;
     Sensor::ErrorCode requestDMA(uint16_t len);
 
-    Sensor::ErrorCode dump(const void *data, size_t size);
+    Sensor::ErrorCode dump(const void *data);
 
     void poll() override;
     Sensor::ErrorCode disableNMEAMsgs();

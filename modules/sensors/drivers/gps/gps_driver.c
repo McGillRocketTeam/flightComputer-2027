@@ -3,33 +3,26 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "main.h"
 #include "gps_driver.h"
+#include "stm32f4xx_hal_def.h"
 #include "u_ubx_protocol.h"
+#include "usart.h"
+#include "util/helpers.h"
 
 // Initializes the GPS driver.
-gps_status_t gps_driver_init(gps_driver_t *self, const gps_config_t *config) {
+gps_status_t gps_driver_init(gps_driver_t *self) {
     if (self == NULL) { return GPS_DRIVER_CONFIG_ERROR; }
 
     self->initialized = false;
     self->status = GPS_DRIVER_OK;
 
-    if (config == NULL || config->printf == NULL) {
-        return GPS_DRIVER_CONFIG_ERROR;
-    }
-    self->printf = config->printf;
-
-    if (config->delay == NULL || config->uart_bus == NULL ||
-        config->uart_write == NULL || config->uart_read == NULL ||
-        config->get_tick == NULL) {
-        self->printf("[GPS] Invalid configuration (null pointer).\r\n");
-        self->status = GPS_DRIVER_CONFIG_ERROR;
-        return GPS_DRIVER_CONFIG_ERROR;
-    }
-    self->delay = config->delay;
-    self->uart_bus = config->uart_bus;
-    self->uart_write = config->uart_write;
-    self->uart_read = config->uart_read;
-    self->get_tick = config->get_tick;
+    self->printf = printf;
+    self->delay = delay;
+    self->get_tick = getMillis;
+    self->uart_bus = &huart6;
+    self->uart_write = HAL_UART_Transmit;
+    self->uart_read = HAL_UART_Receive_DMA;
 
     // clear DMA buffer
     memset(self->dma_buf, 0, GPS_DMA_BUF_SIZE);
@@ -70,7 +63,7 @@ gps_status_t gps_driver_request_dma(gps_driver_t *self, uint16_t len) {
         return GPS_DRIVER_BUFFER_OVERFLOW;
     }
     memset(self->dma_buf, 0, GPS_DMA_BUF_SIZE);
-    if (self->uart_read(self->uart_bus, self->dma_buf, len) != 0) {
+    if (self->uart_read(self->uart_bus, self->dma_buf, len) != HAL_OK) {
         self->status = GPS_DRIVER_ERROR;
         return GPS_DRIVER_ERROR;
     }
@@ -101,23 +94,20 @@ gps_status_t gps_driver_poll(gps_driver_t *self) {
         return err;
     }
 
-    if (self->uart_write(self->uart_bus, ubx_nav_pvt, sizeof(ubx_nav_pvt)) !=
-        0) {
+    if (self->uart_write(self->uart_bus, ubx_nav_pvt, sizeof(ubx_nav_pvt), 20) !=
+        HAL_OK) {
         self->status = GPS_DRIVER_ERROR;
         return GPS_DRIVER_ERROR;
     }
-    self->delay(30);
-
-    err = gps_driver_parse_dma_buf(self); // FIX: race condition?
-    if (err != GPS_DRIVER_OK) {
-        self->status = err;
-        return err;
-    }
+    self->delay(30); // leave time for callback to parse DMA buffer
 
     return GPS_DRIVER_OK;
 }
 
-gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self);
+gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self) {
+    
+}
+
 gps_status_t gps_driver_factory_reset_gps(gps_driver_t *self);
 
 // Configure GPS navigation engine settings to dynamic platform model
@@ -176,18 +166,11 @@ gps_status_t gps_driver_configure_dynamic_model(gps_driver_t *self,
         }
 
         if (self->uart_write(self->uart_bus, (const uint8_t *)encoded,
-                             bytes_encoded) != 0) {
+                             bytes_encoded, 100) != HAL_OK) {
             self->status = GPS_DRIVER_ERROR;
             continue;
         }
-
-        self->delay(25);
-
-        err = gps_driver_parse_dma_buf(self); // FIX: race condition?
-        if (err != GPS_DRIVER_OK) {
-            self->status = err;
-            continue;
-        }
+        self->delay(30); // leave time for callback to parse DMA buffer
 
         if (self->nav_configured) {
             self->printf("[GPS] Successfully configured dynamic model.\r\n");

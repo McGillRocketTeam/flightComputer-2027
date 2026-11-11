@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "stm32f4xx_hal_def.h"
+#include "stm32f4xx_hal_uart.h"
 #include "ubx_messages.h"
 
 #define REPLY_CLASS_ID(class, id) class << 8 | id
@@ -55,12 +57,12 @@ typedef struct gps_driver_t {
 
     gps_status_t status;
 
-    void *uart_bus;
-    int32_t (*uart_write)(void *uart_bus, const uint8_t *buf, uint16_t len);
-    int32_t (*uart_read)(void *uart_bus, uint8_t *buf, uint16_t len);
+    UART_HandleTypeDef *uart_bus;
+    HAL_StatusTypeDef (*uart_write)(UART_HandleTypeDef *uart_bus, const uint8_t *buf, uint16_t len, uint32_t timeout);
+    HAL_StatusTypeDef (*uart_read)(UART_HandleTypeDef *uart_bus, uint8_t *buf, uint16_t len);
     int (*printf)(const char *s, ...);
-    void (*delay)(uint32_t ms);
-    uint32_t (*get_tick)(void);
+    void (*delay)(int ms);
+    long unsigned int (*get_tick)(void);
 } gps_driver_t;
 
 typedef struct gps_config_t {
@@ -72,10 +74,10 @@ typedef struct gps_config_t {
     uint32_t (*get_tick)(void);
 } gps_config_t;
 
-gps_status_t gps_driver_init(gps_driver_t *self, const gps_config_t *config);
+gps_status_t gps_driver_init(gps_driver_t *self);
 gps_status_t gps_driver_request_dma(gps_driver_t *self, uint16_t len);
 
-gps_status_t gps_driver_dump(gps_driver_t *self, const void *data, size_t size);
+gps_status_t gps_driver_dump(gps_driver_t *self);
 
 gps_status_t gps_driver_poll(gps_driver_t *self);
 gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self);

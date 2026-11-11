@@ -1,9 +1,0 @@
--I.
--I./modules
--I./modules/sensors
--I./modules/telemetry
--I./modules/util
--I./proc_top/Inc
--I./prop_bottom/Inc
--I./fc/Inc
--xc++

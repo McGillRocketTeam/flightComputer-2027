@@ -1,24 +1,22 @@
+#include <cstdbool>
 #include <cstdint>
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstring>
 
-#include "GPS/gps_driver.h"
-#include "sensors/GPS.h"
+#include "GPS.h"
+#include "drivers/gps/gps_driver.h"
 
-GPS::GPS(const gps_config_t &config) {
+GPS::GPS() {
     memset(&_gps, 0, sizeof(gps_driver_t));
-    this->_config = config;
 }
 
-void GPS::init() { gps_driver_init(&_gps, &_config); }
+void GPS::init() { gps_driver_init(&_gps); }
 
 Sensor::ErrorCode GPS::requestDMA(uint16_t len) {
     return translateStatus(gps_driver_request_dma(&_gps, len));
 }
 
-Sensor::ErrorCode GPS::dump(const void *data, size_t size) {
-    return translateStatus(gps_driver_dump(&_gps, data, size));
+Sensor::ErrorCode GPS::dump(const void *data) {
+    return translateStatus(gps_driver_dump(&_gps));
 }
 
 void GPS::poll() { gps_driver_poll(&_gps); }
