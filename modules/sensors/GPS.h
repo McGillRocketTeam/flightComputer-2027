@@ -1,7 +1,8 @@
 #pragma once
-#include "sensors/Sensor.h"
-#include "sensors/GPS/gps_driver.h"
 #include <stdint.h>
+
+#include "sensors/GPS/gps_driver.h"
+#include "sensors/Sensor.h"
 
 struct GPSPosition {
     float latitude;
@@ -16,28 +17,30 @@ struct GPSTime {
 };
 
 class GPS : Sensor {
-    public:
-        explicit GPS(const GPS_Config_t& config);
-        ~GPS() = default;
+  public:
+    explicit GPS(const gps_config_t &config);
+    ~GPS() = default;
 
-        void init() override;
-        void startDMA(uint16_t len);
+    void init() override;
+    Sensor::ErrorCode requestDMA(uint16_t len);
 
-        void dump(const void *data, size_t size);
+    Sensor::ErrorCode dump(const void *data, size_t size);
 
-        void poll() override;
-        void disableNMEAMsgs();
-        void factoryResetGPS();
-        void configureDynamicModel();
-        void parseDMABuf();
+    void poll() override;
+    Sensor::ErrorCode disableNMEAMsgs();
+    Sensor::ErrorCode factoryResetGPS();
+    Sensor::ErrorCode configureDynamicModel(bool force);
+    Sensor::ErrorCode parseDMABuf();
 
-        ErrorCode status() override;
-        bool isInitialized() override;
-        GPSPosition getPosition() const;
-        GPSTime getTime() const;
-        uint32_t getLastUpdate() const;
+    ErrorCode status() override;
+    bool isInitialized() override;
+    GPSPosition getPosition() const;
+    GPSTime getTime() const;
+    uint32_t getLastUpdate() const;
 
-    private:
-        GPS_Driver_t gps;
-        GPS_Config_t config;
+  private:
+    Sensor::ErrorCode translateStatus(gps_status_t status);
+
+    gps_driver_t _gps;
+    gps_config_t _config;
 };

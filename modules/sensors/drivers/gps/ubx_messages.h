@@ -1,14 +1,10 @@
-/*
- * ubx_messages.h
- *
- *  Created on: Sep 3, 2023
- *      Author: jasper
- */
-
 #ifndef INC_UBX_MESSAGES_H_
 #define INC_UBX_MESSAGES_H_
 
 #include <stdint.h>
+
+#define UBX_SYNC_CHAR1 0xB5U
+#define UBX_SYNC_CHAR2 0x62U
 
 // --- message classes --- //
 typedef enum {
@@ -34,7 +30,6 @@ typedef enum {
 } ubx_message_class_t;
 
 // --- message IDs per class --- //
-// (not all implemented because I don't need them all right now)
 typedef enum {
     MSG_ID_UBX_ACK_ACK = 0x01,
     MSG_ID_UBX_ACK_NAK = 0x00,
@@ -91,6 +86,10 @@ typedef enum {
     MSG_ID_UBX_INF_TEST = 0x03,    // ASCII output with test contents
     MSG_ID_UBX_INF_WARNING = 0x01, // ASCII output with warning contents
 } ubx_inf_message_id_t;
+
+typedef enum {
+    MSG_ID_UBX_NAV_PVT = 0x07,
+} ubx_nav_message_id_t;
 
 // --- message lengths per message --- //
 typedef enum {
@@ -153,6 +152,10 @@ typedef enum {
     MSG_LEN_UBX_CFG_TXSLOT = 16,
     MSG_LEN_UBX_CFG_USB = 108,
 } ubx_cfg_message_len_t;
+
+typedef enum {
+    MSG_LEN_UBX_NAV_PVT = 92,
+} ubx_nav_message_len_t;
 
 // INF message have variable length delimited by '\n'. handle accordingly
 
