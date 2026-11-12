@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 
-#include "drivers/gps/gps_driver.h"
 #include "Sensor.h"
+#include "drivers/gps/gps_driver.h"
 
 struct GPSPosition {
     float latitude;
@@ -27,13 +27,15 @@ class GPS : Sensor {
     Sensor::ErrorCode dump(const void *data);
 
     void poll() override;
-    Sensor::ErrorCode disableNMEAMsgs();
     Sensor::ErrorCode factoryResetGPS();
-    Sensor::ErrorCode configureDynamicModel(bool force);
+    Sensor::ErrorCode disableNMEAMsgs(bool force = false);
+    Sensor::ErrorCode configureDynamicModel(bool force = false);
     Sensor::ErrorCode parseDMABuf();
 
     ErrorCode status() override;
     bool isInitialized() override;
+    bool isNavConfigured() const;
+    bool isNMEADisabled() const;
     GPSPosition getPosition() const;
     GPSTime getTime() const;
     uint32_t getLastUpdate() const;
@@ -42,5 +44,4 @@ class GPS : Sensor {
     Sensor::ErrorCode translateStatus(gps_status_t status);
 
     gps_driver_t _gps;
-    gps_config_t _config;
 };

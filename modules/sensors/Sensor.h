@@ -7,9 +7,14 @@ class Sensor {
         ERROR,
         SENSOR_NOT_PRESENT,
         SENSOR_NOT_INITIALIZED,
-        GPS_CONFIG_ERROR,
+
+        // GPS driver error codes
+        GPS_INVALID_ARGUMENT,
+        GPS_UART_ERROR,
         GPS_TIMEOUT,
         GPS_BUFFER_OVERFLOW,
+        GPS_NO_DATA,
+        GPS_NACK,
     };
 
     virtual ~Sensor() = default;

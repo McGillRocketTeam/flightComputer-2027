@@ -182,17 +182,24 @@ typedef enum {
 } ubx_cfg_nav5_fixModes_t;
 
 // bitmask for UBX-CFG-NAV5
-static const uint16_t BITMASK_UBX_CFG_NAV5_ALL = 0x05FF;
-static const uint16_t BITMASK_UBX_CFG_NAV5_NONE = 0x0000;
-static const uint16_t BITMASK_UBX_CFG_NAV5_dyn = (1 << 0);
-static const uint16_t BITMASK_UBX_CFG_NAV5_minEl = (1 << 1);
-static const uint16_t BITMASK_UBX_CFG_NAV5_posFixMode = (1 << 2);
-static const uint16_t BITMASK_UBX_CFG_NAV5_drLim = (1 << 3);
-static const uint16_t BITMASK_UBX_CFG_NAV5_posMask = (1 << 4);
-static const uint16_t BITMASK_UBX_CFG_NAV5_timeMask = (1 << 5);
-static const uint16_t BITMASK_UBX_CFG_NAV5_staticHoldMask = (1 << 6);
-static const uint16_t BITMASK_UBX_CFG_NAV5_dgpsMask = (1 << 7);
-static const uint16_t BITMASK_UBX_CFG_NAV5_cnoThreshold = (1 << 8);
-static const uint16_t BITMASK_UBX_CFG_NAV5_utc = (1 << 10);
+#define BITMASK_UBX_CFG_NAV5_ALL 0x05FF
+#define BITMASK_UBX_CFG_NAV5_NONE 0x0000
+#define BITMASK_UBX_CFG_NAV5_dyn (1 << 0)
+#define BITMASK_UBX_CFG_NAV5_minEl (1 << 1)
+#define BITMASK_UBX_CFG_NAV5_posFixMode (1 << 2)
+#define BITMASK_UBX_CFG_NAV5_drLim (1 << 3)
+#define BITMASK_UBX_CFG_NAV5_posMask (1 << 4)
+#define BITMASK_UBX_CFG_NAV5_timeMask (1 << 5)
+#define BITMASK_UBX_CFG_NAV5_staticHoldMask (1 << 6)
+#define BITMASK_UBX_CFG_NAV5_dgpsMask (1 << 7)
+#define BITMASK_UBX_CFG_NAV5_cnoThreshold (1 << 8)
+#define BITMASK_UBX_CFG_NAV5_utc (1 << 10)
+
+// --- UBX-CFG-PRT message-specific parameters --- //
+
+#define UBX_PORT_UART1           (0x01U)
+#define UBX_PROTO_MASK_UBX       (1U << 0)
+#define UBX_PROTO_MASK_NMEA      (1U << 1)
+#define UBX_PROTO_MASK_RTCM      (1U << 2)
 
 #endif /* INC_UBX_MESSAGES_H_ */
