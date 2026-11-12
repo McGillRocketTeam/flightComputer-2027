@@ -28,9 +28,9 @@ void GPS::poll() {
     gps_driver_poll(&_gps);
 }
 
-Sensor::ErrorCode GPS::factoryResetGPS() {
+Sensor::ErrorCode GPS::reset() {
     if (!isInitialized()) { return Sensor::ErrorCode::SENSOR_NOT_INITIALIZED; }
-    return translateStatus(gps_driver_factory_reset_gps(&_gps));
+    return translateStatus(gps_driver_reset(&_gps));
 }
 
 Sensor::ErrorCode GPS::disableNMEAMsgs(bool force) {

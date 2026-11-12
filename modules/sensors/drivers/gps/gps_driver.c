@@ -29,7 +29,7 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
     // Clear DMA buffer
     memset(self->dma_buf, 0, GPS_DMA_BUF_SIZE);
 
-    // Clear all data
+    // Set all data
     self->latitude = 0.0f;
     self->longitude = 0.0f;
     self->altitude = 0.0f;
@@ -40,7 +40,11 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
     self->nmea_disabled = false;
     self->nav_configured = false;
     self->has_fix = false;
-    self->fix_type = 0;
+    self->fix_type = GPS_FIX_NONE;
+    self->num_satellites = 0;
+    self->h_acc_m = 0.0f;
+    self->v_acc_m = 0.0f;
+    self->pdop = 99.99f;
 
     // Get baud rate
     self->baud_rate = ((UART_HandleTypeDef *)self->uart_bus)->Init.BaudRate;
@@ -50,21 +54,21 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
     self->status = GPS_DRIVER_OK;
 
     // Disable NMEA messages
-    // gps_status_t err = gps_driver_disable_nmea_msgs(self, true);
-    // if (err != GPS_DRIVER_OK) {
-    //     self->status = err;
-    //     return err;
-    // }
-
+    gps_status_t err = gps_driver_disable_nmea_msgs(self, true);
+    if (err != GPS_DRIVER_OK) {
+        self->status = err;
+        return err;
+    }
     self->delay(50);
 
     // Configure Airborne 4G dynamic platform model
-    gps_status_t err = gps_driver_configure_dynamic_model(self, true);
+    err = gps_driver_configure_dynamic_model(self, true);
     if (err != GPS_DRIVER_OK) {
         self->initialized = false;
         self->status = err;
         return err;
     }
+    self->delay(50);
 
     self->printf("[GPS] Initialized GPS Driver.\r\n");
     return GPS_DRIVER_OK;
@@ -127,7 +131,7 @@ gps_status_t gps_driver_poll(gps_driver_t *self) {
 }
 
 // Hot restart the GPS
-gps_status_t gps_driver_factory_reset_gps(gps_driver_t *self) {
+gps_status_t gps_driver_reset(gps_driver_t *self) {
     if (self == NULL) { return GPS_DRIVER_INVALID_ARG; }
     if (!self->initialized || self->status == GPS_DRIVER_NOT_INITIALIZED) {
         self->initialized = false;
@@ -427,17 +431,33 @@ gps_status_t _gps_driver_parse_pvt(gps_driver_t *self, const char *payload) {
     }
 
     const uint8_t *buf = (const uint8_t *)payload;
-    self->fix_type = buf[20];
+
+    uint8_t fix_type = buf[20];
+    if (fix_type < GPS_FIX_NONE || fix_type > GPS_FIX_TIME_ONLY) {
+        self->status = GPS_DRIVER_INVALID_PACKET;
+        return GPS_DRIVER_INVALID_PACKET;
+    }
+
+    self->fix_type = (gps_fix_type_t)fix_type;
+    self->num_satellites = buf[23];
+
+    uint16_t raw_pdop = uUbxProtocolUint16Decode((const char *)(buf + 76));
+    self->pdop = (float)raw_pdop / 100.0f;
+
     if (buf[21] & 0x01) {
         self->has_fix = true;
 
         int32_t longitude7 = uUbxProtocolUint32Decode((const char *)(buf + 24));
         int32_t latitude7 = uUbxProtocolUint32Decode((const char *)(buf + 28));
         int32_t altitude3 = uUbxProtocolUint32Decode((const char *)(buf + 36));
+        uint32_t h_acc_mm  = uUbxProtocolUint32Decode((const char *)(buf + 40));
+        uint32_t v_acc_mm  = uUbxProtocolUint32Decode((const char *)(buf + 44));
 
         self->longitude = (float)longitude7 / 1e7f;
         self->latitude = (float)latitude7 / 1e7f;
         self->altitude = (float)altitude3 / 1e3f;
+        self->h_acc_m   = (float)h_acc_mm / 1e3f;
+        self->v_acc_m   = (float)v_acc_mm / 1e3f;
 
         self->hours = buf[8];
         self->minutes = buf[9];

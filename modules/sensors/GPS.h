@@ -27,7 +27,7 @@ class GPS : Sensor {
     Sensor::ErrorCode dump(const void *data);
 
     void poll() override;
-    Sensor::ErrorCode factoryResetGPS();
+    Sensor::ErrorCode reset();
     Sensor::ErrorCode disableNMEAMsgs(bool force = false);
     Sensor::ErrorCode configureDynamicModel(bool force = false);
     Sensor::ErrorCode parseDMABuf();
