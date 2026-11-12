@@ -36,9 +36,11 @@ class GPS : Sensor {
     bool isInitialized() override;
     bool isNavConfigured() const;
     bool isNMEADisabled() const;
+    bool hasFix() const;
     GPSPosition getPosition() const;
     GPSTime getTime() const;
     uint32_t getLastUpdate() const;
+    uint8_t getFixType() const;
 
   private:
     Sensor::ErrorCode translateStatus(gps_status_t status);

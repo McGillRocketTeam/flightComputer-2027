@@ -12,6 +12,8 @@
 #include "usart.h"
 #include "util/helpers.h"
 
+gps_status_t gps_driver_new(gps_driver_t *self) {}
+
 // Initializes the GPS driver.
 gps_status_t gps_driver_init(gps_driver_t *self) {
     if (self == NULL) { return GPS_DRIVER_INVALID_ARG; }
@@ -39,6 +41,8 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
     self->last_update = UINT32_MAX;
     self->nmea_disabled = false;
     self->nav_configured = false;
+    self->has_fix = false;
+    self->fix_type = 0;
 
     // Get baud rate
     self->baud_rate = ((UART_HandleTypeDef *)self->uart_bus)->Init.BaudRate;
@@ -59,6 +63,7 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
     // Configure Airborne 4G dynamic platform model
     gps_status_t err = gps_driver_configure_dynamic_model(self, true);
     if (err != GPS_DRIVER_OK) {
+        self->initialized = false;
         self->status = err;
         return err;
     }
@@ -69,7 +74,7 @@ gps_status_t gps_driver_init(gps_driver_t *self) {
 
 // Start background GPS DMA read
 gps_status_t gps_driver_request_dma(gps_driver_t *self, uint16_t len) {
-    if (self == NULL) { return GPS_DRIVER_INVALID_ARG; }
+    if (self == NULL || len == 0) { return GPS_DRIVER_INVALID_ARG; }
     if (!self->initialized || self->status == GPS_DRIVER_NOT_INITIALIZED) {
         self->initialized = false;
         self->status = GPS_DRIVER_NOT_INITIALIZED;
@@ -87,6 +92,7 @@ gps_status_t gps_driver_request_dma(gps_driver_t *self, uint16_t len) {
         self->status = GPS_DRIVER_UART_ERROR;
         return GPS_DRIVER_UART_ERROR;
     }
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
@@ -117,7 +123,8 @@ gps_status_t gps_driver_poll(gps_driver_t *self) {
         return GPS_DRIVER_UART_ERROR;
     }
 
-    self->delay(30); // leave time for callback to parse DMA buffer
+    self->delay(50); // leave time for callback to parse DMA buffer
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
@@ -145,7 +152,7 @@ gps_status_t gps_driver_factory_reset_gps(gps_driver_t *self) {
     }
 
     if (self->uart_write(self->uart_bus, (const uint8_t *)encoded,
-                         bytes_encoded, 100) != 0) {
+                         bytes_encoded, 100) != HAL_OK) {
         self->status = GPS_DRIVER_UART_ERROR;
         return GPS_DRIVER_UART_ERROR;
     }
@@ -154,10 +161,12 @@ gps_status_t gps_driver_factory_reset_gps(gps_driver_t *self) {
 
     self->nav_configured = false;
     self->nmea_disabled = false;
-    self->status = GPS_DRIVER_OK;
+    self->has_fix = false;
+    self->fix_type = 0;
 
     self->printf(
         "[GPS] Factory reset complete. Receiver restored to default.\r\n");
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
@@ -171,6 +180,7 @@ gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self, bool force) {
     }
     if (self->nmea_disabled && !force) {
         self->printf("[GPS] NMEA messages already disabled.\r\n");
+        self->status = GPS_DRIVER_OK;
         return GPS_DRIVER_OK;
     }
 
@@ -255,6 +265,7 @@ gps_status_t gps_driver_configure_dynamic_model(gps_driver_t *self,
     }
     if (self->nav_configured && !force) {
         self->printf("[GPS] Dynamic model already configured.\r\n");
+        self->status = GPS_DRIVER_OK;
         return GPS_DRIVER_OK;
     }
 
@@ -332,13 +343,19 @@ gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self) {
         return GPS_DRIVER_NOT_INITIALIZED;
     }
 
-    uint16_t len = (uint16_t)(self->dma_buf[4] | (self->dma_buf[5] << 8));
-    if (self->dma_buf[0] != UBX_SYNC_CHAR1 ||
-        self->dma_buf[1] != UBX_SYNC_CHAR2 || !len) {
-        return GPS_DRIVER_NO_DATA;
-    }
+    int32_t message_class = 0;
+    int32_t message_id = 0;
+    char payload[100] = {0};
+    const char *buf_out = NULL;
 
-    uint16_t class_id = (uint16_t)((self->dma_buf[2] << 8) | self->dma_buf[3]);
+    // Decode DMA buffer
+    int32_t len = uUbxProtocolDecode(
+        (const char *)self->dma_buf, GPS_DMA_BUF_SIZE, &message_class,
+        &message_id, payload, sizeof(payload), &buf_out);
+    if (len < 0) {
+        self->status = GPS_DRIVER_INVALID_PACKET;
+        return GPS_DRIVER_INVALID_PACKET;
+    }
 
     // Debug dump
     // gps_driver_dump(self);
@@ -347,40 +364,39 @@ gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self) {
     const uint8_t zeros[6] = {0};
     bool success;
     gps_status_t err;
-    uint8_t acked_class;
-    uint8_t acked_id;
+    uint8_t ack_cls, ack_id;
     uint16_t src;
 
+    uint16_t class_id = (uint16_t)((message_class << 8) | message_id);
     switch (class_id) {
     case NAV_PVT:
-        return _gps_driver_parse_pvt(self);
+        return _gps_driver_parse_pvt(self, payload);
 
     case CFG_NAV:
-        // reply[8] = dynmodel | reply[9] = fixMode
         self->nav_configured =
-            (self->dma_buf[8] == DYNAMIC_PLATFORM_MODEL_AIRBORNE_4G &&
-             self->dma_buf[9] == FIXMODE_AUTO_2D_3D);
+            ((uint8_t)payload[2] == DYNAMIC_PLATFORM_MODEL_AIRBORNE_4G &&
+             (uint8_t)payload[3] == FIXMODE_AUTO_2D_3D);
         break;
 
     case CFG_MSG:
-        success = memcmp(self->dma_buf + 8, zeros, 6) == 0;
+        success = memcmp(payload + 2, zeros, 6) == 0;
         self->printf("[GPS] CFG_MSG %s\r\n",
                      (success)
                          ? "succeeded (messages are disabled)."
                          : "failed (messages may still appear). Retrying...");
-        if (!success) {
-            err = gps_driver_disable_nmea_msgs(self, true);
-            if (err != GPS_DRIVER_OK) { return err; }
-        }
+        // if (!success) {
+        //     err = gps_driver_disable_nmea_msgs(self, true);
+        //     if (err != GPS_DRIVER_OK) { return err; }
+        // }
         break;
 
     case ACK:
-        acked_class = self->dma_buf[U_UBX_PROTOCOL_HEADER_LENGTH_BYTES];
-        acked_id = self->dma_buf[U_UBX_PROTOCOL_HEADER_LENGTH_BYTES + 1];
-        src = (uint16_t)((acked_class << 8) | acked_id);
+        ack_cls = (uint8_t)payload[0];
+        ack_id = (uint8_t)payload[1];
         self->printf("[GPS] Received ACK (class: 0x%02X | id: 0x%02X)\r\n",
-                     acked_class, acked_id);
+                     ack_cls, ack_id);
 
+        src = (uint16_t)((ack_cls << 8) | ack_id);
         if (src == CFG_NAV) {
             self->nav_configured = true;
             self->printf("[GPS] CFG_NAV configured (ACK).\r\n");
@@ -392,38 +408,39 @@ gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self) {
 
     case NACK:
         self->printf("[GPS] Received NACK (class: 0x%02X | id: 0x%02X)\r\n",
-                     self->dma_buf[U_UBX_PROTOCOL_HEADER_LENGTH_BYTES],
-                     self->dma_buf[U_UBX_PROTOCOL_HEADER_LENGTH_BYTES + 1]);
+                     (uint8_t)payload[0], (uint8_t)payload[1]);
+        self->status = GPS_DRIVER_NACK;
         return GPS_DRIVER_NACK;
 
     default:
         break;
     }
 
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
 // Parses PVT from GPS DMA buffer
-// Modified from:
-// https://github.com/u-blox/ubxlib/blob/a2d986e2944141176eedaee6dc4be87be7eea57b/example/gnss/msg_main.c#L234
-gps_status_t _gps_driver_parse_pvt(gps_driver_t *self) {
-    if (self == NULL) { return GPS_DRIVER_INVALID_ARG; }
+gps_status_t _gps_driver_parse_pvt(gps_driver_t *self, const char *payload) {
+    if (self == NULL || payload == NULL) { return GPS_DRIVER_INVALID_ARG; }
     if (!self->initialized || self->status == GPS_DRIVER_NOT_INITIALIZED) {
         self->initialized = false;
         self->status = GPS_DRIVER_NOT_INITIALIZED;
         return GPS_DRIVER_NOT_INITIALIZED;
     }
 
-    uint8_t *buf = self->dma_buf + U_UBX_PROTOCOL_HEADER_LENGTH_BYTES;
-
+    const uint8_t *buf = (const uint8_t *)payload;
+    self->fix_type = buf[20];
     if (buf[21] & 0x01) {
+        self->has_fix = true;
+
         int32_t longitude7 = uUbxProtocolUint32Decode((const char *)(buf + 24));
         int32_t latitude7 = uUbxProtocolUint32Decode((const char *)(buf + 28));
         int32_t altitude3 = uUbxProtocolUint32Decode((const char *)(buf + 36));
 
-        self->longitude = (float)(longitude7 / 1e7);
-        self->latitude = (float)(latitude7 / 1e7);
-        self->altitude = (float)(altitude3 / 1e3);
+        self->longitude = (float)longitude7 / 1e7f;
+        self->latitude = (float)latitude7 / 1e7f;
+        self->altitude = (float)altitude3 / 1e3f;
 
         self->hours = buf[8];
         self->minutes = buf[9];
@@ -436,10 +453,12 @@ gps_status_t _gps_driver_parse_pvt(gps_driver_t *self) {
                      self->latitude, self->longitude, self->altitude,
                      self->hours, self->minutes, self->seconds);
     } else {
+        self->has_fix = false;
         self->printf("[GPS] NAV_PVT no valid fix (gnssFixOK flag not enabled). "
                      "GPS data not updated.\r\n");
     }
 
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
@@ -486,6 +505,7 @@ gps_status_t gps_driver_dump(gps_driver_t *self) {
         self->printf("0x%04X: %s |  %s\r\n", (unsigned int)i, hex, ascii);
     }
     self->printf("\r\n");
+    self->status = GPS_DRIVER_OK;
     return GPS_DRIVER_OK;
 }
 
@@ -494,8 +514,9 @@ static int gps_uart_read(void *uart_bus, uint8_t *buf, uint16_t len) {
 
     // Force stop if previous transfer timed out
     if (bus->RxState != HAL_UART_STATE_READY) { HAL_UART_DMAStop(bus); }
+    __HAL_UART_CLEAR_OREFLAG(bus);
 
-    // RxState must be HAL_UART_STATE_READY
+    memset(buf, 0, GPS_DMA_BUF_SIZE);
     return (int)HAL_UART_Receive_DMA(bus, buf, len);
 }
 

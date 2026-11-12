@@ -53,16 +53,16 @@ Sensor::ErrorCode GPS::status() { return translateStatus(_gps.status); }
 bool GPS::isInitialized() { return _gps.initialized; }
 bool GPS::isNavConfigured() const { return _gps.nav_configured; }
 bool GPS::isNMEADisabled() const { return _gps.nmea_disabled; }
+bool GPS::hasFix() const { return _gps.has_fix; }
 
 GPSPosition GPS::getPosition() const {
     return {_gps.latitude, _gps.longitude, _gps.altitude};
 }
-
 GPSTime GPS::getTime() const {
     return {_gps.hours, _gps.minutes, _gps.seconds};
 }
-
 uint32_t GPS::getLastUpdate() const { return _gps.last_update; }
+uint8_t GPS::getFixType() const { return _gps.fix_type; }
 
 Sensor::ErrorCode translateStatus(gps_status_t status) {
     switch (status) {
@@ -78,8 +78,8 @@ Sensor::ErrorCode translateStatus(gps_status_t status) {
         return Sensor::ErrorCode::GPS_TIMEOUT;
     case GPS_DRIVER_BUFFER_OVERFLOW:
         return Sensor::ErrorCode::GPS_BUFFER_OVERFLOW;
-    case GPS_DRIVER_NO_DATA:
-        return Sensor::ErrorCode::GPS_NO_DATA;
+    case GPS_DRIVER_INVALID_PACKET:
+        return Sensor::ErrorCode::GPS_INVALID_PACKET;
     case GPS_DRIVER_NACK:
         return Sensor::ErrorCode::GPS_NACK;
     case GPS_DRIVER_ERROR:

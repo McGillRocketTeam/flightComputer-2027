@@ -13,7 +13,7 @@ class Sensor {
         GPS_UART_ERROR,
         GPS_TIMEOUT,
         GPS_BUFFER_OVERFLOW,
-        GPS_NO_DATA,
+        GPS_INVALID_PACKET,
         GPS_NACK,
     };
 

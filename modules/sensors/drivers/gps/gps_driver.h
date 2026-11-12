@@ -30,7 +30,7 @@ typedef enum gps_status_t {
     GPS_DRIVER_UART_ERROR,
     GPS_DRIVER_TIMEOUT,
     GPS_DRIVER_BUFFER_OVERFLOW,
-    GPS_DRIVER_NO_DATA,
+    GPS_DRIVER_INVALID_PACKET,
     GPS_DRIVER_NACK,
 } gps_status_t;
 
@@ -51,6 +51,8 @@ typedef struct gps_driver_t {
     bool nmea_disabled;
     bool nav_configured;
     bool initialized;
+    bool has_fix;
+    uint8_t fix_type;
 
     gps_status_t status;
 
@@ -79,4 +81,4 @@ gps_status_t gps_driver_factory_reset_gps(gps_driver_t *self);
 gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self, bool force);
 gps_status_t gps_driver_configure_dynamic_model(gps_driver_t *self, bool force);
 gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self);
-gps_status_t _gps_driver_parse_pvt(gps_driver_t *self);
+gps_status_t _gps_driver_parse_pvt(gps_driver_t *self, const char* payload);
