@@ -1,0 +1,6 @@
+IndentWidth: 4
+BasedOnStyle: LLVM
+UseTab: Never
+
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortBlocksOnASingleLine: Always
