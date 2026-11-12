@@ -12,8 +12,6 @@
 #include "usart.h"
 #include "util/helpers.h"
 
-gps_status_t gps_driver_new(gps_driver_t *self) {}
-
 // Initializes the GPS driver.
 gps_status_t gps_driver_init(gps_driver_t *self) {
     if (self == NULL) { return GPS_DRIVER_INVALID_ARG; }
@@ -363,7 +361,6 @@ gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self) {
     // variable declarations
     const uint8_t zeros[6] = {0};
     bool success;
-    gps_status_t err;
     uint8_t ack_cls, ack_id;
     uint16_t src;
 
