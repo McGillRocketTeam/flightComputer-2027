@@ -79,6 +79,11 @@ def generate(params, flags, version):
     w(f"#define ATOMIC_VERSION \"{version}\"")
     # Generate Atomic Types
     w("// Designed for usage with 16-bit atomic bitmask")
+
+    w("")
+    w("")
+    w("#define SAFE_COPY(src, dest) ((src) != nullptr ? ((dest) = *(src), true) : false)")
+    w("")
     w("enum SDAtomicTypes {")
     pos = 0
     for atomic in params:
@@ -146,18 +151,33 @@ def generate(params, flags, version):
         w(f"    bool* {flag[0]};")
     w("};")
     w("")
+
+    # Fill Functions
+    # w("template <typename T, typename U>")
+    # w("inline bool safe_copy(const T* src, U& dest){")
+    # w("    if(src == nullptr){")
+    # w("        return false;")
+    # w("    }")
+    # w("    dest = *src")
+    # w("}")
+    w("")
     for atomic in params:
         if len(atomic[1]) == 0:
             continue
-        w(f"inline void fill_{atomic[0]}({atomic[0]}_ptr_SD_t& ptr, {atomic[0]}_atomic_SD_t& out){{")
+        w(f"inline bool fill_{atomic[0]}({atomic[0]}_ptr_SD_t& ptr, {atomic[0]}_atomic_SD_t& out){{")
+        w("    bool ok = true;")
         for param in atomic[1]:
-            w(f"    out.data.{param[0]} = *ptr.{param[0]};")
+            w(f"    ok &= SAFE_COPY(ptr.{param[0]}, out.data.{param[0]});")
+            # w(f"    out.data.{param[0]} = *ptr.{param[0]};")
+        w("    return ok;")
         w("};")
         w("")
 
-    w(f"inline void fill_flags(flags_ptr_SD_t& ptr, flags_atomic_SD_t& out){{")
+    w(f"inline bool fill_flags(flags_ptr_SD_t& ptr, flags_atomic_SD_t& out){{")
+    w("    bool ok = true;")
     for flag in flags:
-        w(f"    out.data.{flag[0]} = *ptr.{flag[0]};")
+        w(f"    if(ptr.{flag[0]} != nullptr){{" + f"out.data.{flag[0]} = *ptr.{flag[0]}; " + "} else {ok = false;}")
+    w("    return ok;")
     w("};")
     w("")
 

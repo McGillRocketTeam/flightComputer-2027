@@ -7,6 +7,7 @@ import sys
 import yaml
 import csv
 import struct
+import re
 
 TYPE_SIZES_C = {"uint8"  : 1,
               "int8"   : 1,
@@ -124,6 +125,16 @@ if __name__ == "__main__":
             file_bytes = sd_data.read()
     except FileNotFoundError:
         print("SD File Not Found")
+        exit(1)
+
+    match = re.search(r"(\d+).MRT$", sys.argv[1])
+    if(match):
+        if(int(match.group(1)) != data.get('version', "")):
+            print(f"Captured: {match.group(1)}")
+            print(f"SD Card Atomic Version Mismatch [Script: {data.get('version', '')}][File: {match.group(1)}]")
+            exit(1)
+    else:
+        print("Unable to Extract Atomic Version from File")
         exit(1)
     paramList, flags = listParams(data)
     parse(paramList, flags, file_bytes, sys.argv[1])
