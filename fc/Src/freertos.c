@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "MRT_main.h"
+#include "MRT_setup.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,6 +95,9 @@ void vApplicationDaemonTaskStartupHook(void);
 /* USER CODE BEGIN DAEMON_TASK_STARTUP_HOOK */
 void vApplicationDaemonTaskStartupHook(void)
 {
+
+    /* creation of Telemetry */
+	TelemetryHandle = osThreadNew(StartTelemetry, NULL, &Telemetry_attributes);
 }
 /* USER CODE END DAEMON_TASK_STARTUP_HOOK */
 
@@ -123,6 +126,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  #ifdef THREADS_NOT_CREATED_HERE
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -140,6 +144,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  #endif
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -160,7 +165,7 @@ void StartTelemetry(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartTelemetry */
-    MRT_main();
+    MRT_setup();
   /* USER CODE END StartTelemetry */
 }
 
