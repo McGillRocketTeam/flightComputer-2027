@@ -1,4 +1,5 @@
 #include <sd_card/SDCard.h>
+#include "util/helpers.h"
 
 SDCard::SDCard(){}
 
@@ -19,7 +20,7 @@ FRESULT SDCard::mount(){
 
     if(inserted){
         res = f_mount(&file_system, "", 1);
-        mounted = res == FR_OK;
+        mounted = (res == FR_OK);
     }
 
     return res;
@@ -81,10 +82,23 @@ bool SDCard::packet(uint16_t bitmask){
 
     fb.reset();
 
+    // Zero out all atomics
+    flight_atomic = {0};
+    fc_atomic = {0};
+    gps_atomic = {0};
+    barometer_atomic = {0};
+    imu_atomic = {0};
+    magnetometer_atomic = {0};
+    propulsion_atomic = {0};
+    flags_atomic = {0};
+
     // Pull relevant packets from stored pointers
     fill(bitmask);
 
+    // Clear buffer
     memset(buf, 0, SD_BUF_LEN);
+
+    printf("Filling Atomics\n");
 
     for(int i = 0; i < 16; i++){
         if((bitmask & (1u<<i)) && (active_atomics & (1u<<i))){
@@ -118,6 +132,8 @@ bool SDCard::packet(uint16_t bitmask){
             };
         }
     }
+
+    printf("Bitmask: %d\n", bitmask);
 
     size_t used = fb.finalize_SD();
 

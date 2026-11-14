@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE; DO NOT EDIT (Source: generate_sd_data.py)
-// Last Generated: 2026-11-02 21:37:53.600608
+// Last Generated: 2026-11-06 18:45:11.885903
 
 #pragma once
 #include <stdint.h>
@@ -8,6 +8,10 @@
 
 #define ATOMIC_VERSION "0"
 // Designed for usage with 16-bit atomic bitmask
+
+
+#define SAFE_COPY(src, dest) ((src) != nullptr ? ((dest) = *(src), true) : false)
+
 enum SDAtomicTypes {
     SD_AT_FLIGHT = (0),
     SD_AT_FC = (1),
@@ -216,80 +220,97 @@ struct __attribute__((__packed__)) flags_ptr_SD_t {
     bool* vent_continuity;
 };
 
-inline void fill_flight(flight_ptr_SD_t& ptr, flight_atomic_SD_t& out){
-    out.data.flight_stage = *ptr.flight_stage;
-    out.data.alt_agl = *ptr.alt_agl;
-    out.data.alt_asl = *ptr.alt_asl;
-    out.data.vertical_speed = *ptr.vertical_speed;
-    out.data.apogee = *ptr.apogee;
-    out.data.main_alt = *ptr.main_alt;
-    out.data.booster_burnout_alt = *ptr.booster_burnout_alt;
+
+inline bool fill_flight(flight_ptr_SD_t& ptr, flight_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.flight_stage, out.data.flight_stage);
+    ok &= SAFE_COPY(ptr.alt_agl, out.data.alt_agl);
+    ok &= SAFE_COPY(ptr.alt_asl, out.data.alt_asl);
+    ok &= SAFE_COPY(ptr.vertical_speed, out.data.vertical_speed);
+    ok &= SAFE_COPY(ptr.apogee, out.data.apogee);
+    ok &= SAFE_COPY(ptr.main_alt, out.data.main_alt);
+    ok &= SAFE_COPY(ptr.booster_burnout_alt, out.data.booster_burnout_alt);
+    return ok;
 };
 
-inline void fill_fc(fc_ptr_SD_t& ptr, fc_atomic_SD_t& out){
-    out.data.time_since_sw_reset = *ptr.time_since_sw_reset;
-    out.data.battery_voltage = *ptr.battery_voltage;
-    out.data.current_draw = *ptr.current_draw;
-    out.data.time_since_radio_contact = *ptr.time_since_radio_contact;
-    out.data.radio_frequency = *ptr.radio_frequency;
+inline bool fill_fc(fc_ptr_SD_t& ptr, fc_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.time_since_sw_reset, out.data.time_since_sw_reset);
+    ok &= SAFE_COPY(ptr.battery_voltage, out.data.battery_voltage);
+    ok &= SAFE_COPY(ptr.current_draw, out.data.current_draw);
+    ok &= SAFE_COPY(ptr.time_since_radio_contact, out.data.time_since_radio_contact);
+    ok &= SAFE_COPY(ptr.radio_frequency, out.data.radio_frequency);
+    return ok;
 };
 
-inline void fill_gps(gps_ptr_SD_t& ptr, gps_atomic_SD_t& out){
-    out.data.gps_lat = *ptr.gps_lat;
-    out.data.gps_long = *ptr.gps_long;
-    out.data.gps_alt = *ptr.gps_alt;
-    out.data.time_since_fix = *ptr.time_since_fix;
+inline bool fill_gps(gps_ptr_SD_t& ptr, gps_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.gps_lat, out.data.gps_lat);
+    ok &= SAFE_COPY(ptr.gps_long, out.data.gps_long);
+    ok &= SAFE_COPY(ptr.gps_alt, out.data.gps_alt);
+    ok &= SAFE_COPY(ptr.time_since_fix, out.data.time_since_fix);
+    return ok;
 };
 
-inline void fill_barometer(barometer_ptr_SD_t& ptr, barometer_atomic_SD_t& out){
-    out.data.baro_pressure = *ptr.baro_pressure;
-    out.data.baro_temp = *ptr.baro_temp;
+inline bool fill_barometer(barometer_ptr_SD_t& ptr, barometer_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.baro_pressure, out.data.baro_pressure);
+    ok &= SAFE_COPY(ptr.baro_temp, out.data.baro_temp);
+    return ok;
 };
 
-inline void fill_imu(imu_ptr_SD_t& ptr, imu_atomic_SD_t& out){
-    out.data.accel_x = *ptr.accel_x;
-    out.data.accel_y = *ptr.accel_y;
-    out.data.accel_z = *ptr.accel_z;
-    out.data.gyro_x = *ptr.gyro_x;
-    out.data.gyro_y = *ptr.gyro_y;
-    out.data.gyro_z = *ptr.gyro_z;
+inline bool fill_imu(imu_ptr_SD_t& ptr, imu_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.accel_x, out.data.accel_x);
+    ok &= SAFE_COPY(ptr.accel_y, out.data.accel_y);
+    ok &= SAFE_COPY(ptr.accel_z, out.data.accel_z);
+    ok &= SAFE_COPY(ptr.gyro_x, out.data.gyro_x);
+    ok &= SAFE_COPY(ptr.gyro_y, out.data.gyro_y);
+    ok &= SAFE_COPY(ptr.gyro_z, out.data.gyro_z);
+    return ok;
 };
 
-inline void fill_magnetometer(magnetometer_ptr_SD_t& ptr, magnetometer_atomic_SD_t& out){
-    out.data.mag_x = *ptr.mag_x;
-    out.data.mag_y = *ptr.mag_y;
-    out.data.mag_z = *ptr.mag_z;
+inline bool fill_magnetometer(magnetometer_ptr_SD_t& ptr, magnetometer_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.mag_x, out.data.mag_x);
+    ok &= SAFE_COPY(ptr.mag_y, out.data.mag_y);
+    ok &= SAFE_COPY(ptr.mag_z, out.data.mag_z);
+    return ok;
 };
 
-inline void fill_propulsion(propulsion_ptr_SD_t& ptr, propulsion_atomic_SD_t& out){
-    out.data.tank_top_pressure = *ptr.tank_top_pressure;
-    out.data.tank_bot_pressure = *ptr.tank_bot_pressure;
-    out.data.tank_top_temp = *ptr.tank_top_temp;
-    out.data.tank_bot_temp = *ptr.tank_bot_temp;
+inline bool fill_propulsion(propulsion_ptr_SD_t& ptr, propulsion_atomic_SD_t& out){
+    bool ok = true;
+    ok &= SAFE_COPY(ptr.tank_top_pressure, out.data.tank_top_pressure);
+    ok &= SAFE_COPY(ptr.tank_bot_pressure, out.data.tank_bot_pressure);
+    ok &= SAFE_COPY(ptr.tank_top_temp, out.data.tank_top_temp);
+    ok &= SAFE_COPY(ptr.tank_bot_temp, out.data.tank_bot_temp);
+    return ok;
 };
 
-inline void fill_flags(flags_ptr_SD_t& ptr, flags_atomic_SD_t& out){
-    out.data.CAN_bus_active = *ptr.CAN_bus_active;
-    out.data.camera_recording = *ptr.camera_recording;
-    out.data.gps_fix = *ptr.gps_fix;
-    out.data.recovery_armed = *ptr.recovery_armed;
-    out.data.main_armed = *ptr.main_armed;
-    out.data.main_energized = *ptr.main_energized;
-    out.data.main_continuity = *ptr.main_continuity;
-    out.data.drogue_armed = *ptr.drogue_armed;
-    out.data.drogue_energized = *ptr.drogue_energized;
-    out.data.drogue_continuity = *ptr.drogue_continuity;
-    out.data.propulsion_armed = *ptr.propulsion_armed;
-    out.data.propulsion_on = *ptr.propulsion_on;
-    out.data.mov_armed = *ptr.mov_armed;
-    out.data.mov_energized = *ptr.mov_energized;
-    out.data.mov_continuity = *ptr.mov_continuity;
-    out.data.fdov_armed = *ptr.fdov_armed;
-    out.data.fdov_energized = *ptr.fdov_energized;
-    out.data.fdov_continuity = *ptr.fdov_continuity;
-    out.data.vent_armed = *ptr.vent_armed;
-    out.data.vent_energized = *ptr.vent_energized;
-    out.data.vent_continuity = *ptr.vent_continuity;
+inline bool fill_flags(flags_ptr_SD_t& ptr, flags_atomic_SD_t& out){
+    bool ok = true;
+    if(ptr.CAN_bus_active != nullptr){out.data.CAN_bus_active = *ptr.CAN_bus_active; } else {ok = false;}
+    if(ptr.camera_recording != nullptr){out.data.camera_recording = *ptr.camera_recording; } else {ok = false;}
+    if(ptr.gps_fix != nullptr){out.data.gps_fix = *ptr.gps_fix; } else {ok = false;}
+    if(ptr.recovery_armed != nullptr){out.data.recovery_armed = *ptr.recovery_armed; } else {ok = false;}
+    if(ptr.main_armed != nullptr){out.data.main_armed = *ptr.main_armed; } else {ok = false;}
+    if(ptr.main_energized != nullptr){out.data.main_energized = *ptr.main_energized; } else {ok = false;}
+    if(ptr.main_continuity != nullptr){out.data.main_continuity = *ptr.main_continuity; } else {ok = false;}
+    if(ptr.drogue_armed != nullptr){out.data.drogue_armed = *ptr.drogue_armed; } else {ok = false;}
+    if(ptr.drogue_energized != nullptr){out.data.drogue_energized = *ptr.drogue_energized; } else {ok = false;}
+    if(ptr.drogue_continuity != nullptr){out.data.drogue_continuity = *ptr.drogue_continuity; } else {ok = false;}
+    if(ptr.propulsion_armed != nullptr){out.data.propulsion_armed = *ptr.propulsion_armed; } else {ok = false;}
+    if(ptr.propulsion_on != nullptr){out.data.propulsion_on = *ptr.propulsion_on; } else {ok = false;}
+    if(ptr.mov_armed != nullptr){out.data.mov_armed = *ptr.mov_armed; } else {ok = false;}
+    if(ptr.mov_energized != nullptr){out.data.mov_energized = *ptr.mov_energized; } else {ok = false;}
+    if(ptr.mov_continuity != nullptr){out.data.mov_continuity = *ptr.mov_continuity; } else {ok = false;}
+    if(ptr.fdov_armed != nullptr){out.data.fdov_armed = *ptr.fdov_armed; } else {ok = false;}
+    if(ptr.fdov_energized != nullptr){out.data.fdov_energized = *ptr.fdov_energized; } else {ok = false;}
+    if(ptr.fdov_continuity != nullptr){out.data.fdov_continuity = *ptr.fdov_continuity; } else {ok = false;}
+    if(ptr.vent_armed != nullptr){out.data.vent_armed = *ptr.vent_armed; } else {ok = false;}
+    if(ptr.vent_energized != nullptr){out.data.vent_energized = *ptr.vent_energized; } else {ok = false;}
+    if(ptr.vent_continuity != nullptr){out.data.vent_continuity = *ptr.vent_continuity; } else {ok = false;}
+    return ok;
 };
 
 extern const uint16_t SD_AT_SIZE[SD_AT_TOTAL];
