@@ -154,7 +154,7 @@ void Error_Handler(void);
 #define OUT_LED3_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
-
+#define SD_SPI_HANDLE hspi4
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
