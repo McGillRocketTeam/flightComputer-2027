@@ -1,4 +1,5 @@
 #pragma once
+
 #include "LIS2MDL/MRT_LIS2MDL.h"
 
 /* LIS2MDL API frontend
@@ -18,7 +19,7 @@
  *
  *
  */
-
+#ifdef __cplusplus
 using I2CWriteFn = int32_t (*)(void* bus, uint8_t reg, const uint8_t* buf, uint16_t len);
 using I2CReadFn  = int32_t (*)(void* bus, uint8_t reg, uint8_t* buf, uint16_t len);
 using DelayFn    = void (*)(int ms);
@@ -93,3 +94,4 @@ public:
 };
 
 // idea : constants file to or ganize run and compile time constants.
+#endif

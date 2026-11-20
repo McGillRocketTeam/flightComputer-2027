@@ -2,23 +2,17 @@
 
 #include "cmsis_os.h"
 
-#include <cstring>
-
 // Called on Telemetry thread
 void MRT_main() {
-    uint8_t valid_fields = 0;
+    
 
     HAL_Delay(2000);
 
     while(1){
-        imu.poll();
+        
+        Vec3 magnetic_field = imu.getMagneticDataVec3();
 
-        const float* accel = imu.getAcceleration();
-        const float* rates = imu.getAngularRate();
-
-        valid_fields = imu.getValidFields();
-
-        printf("IMU Status: %d | ", valid_fields);
-        printf("IMU Readings: Accel: %f, %f, %f, Rate: %f, %f, %f\n", accel[0], accel[1], accel[2], rates[0], rates[1], rates[2]);
+        printf("IMU Status: %d | ", imu.get_constructor_status());
+        printf("IMU Readings: \nRate: %f, %f, %f\n", magnetic_field.x, magnetic_field.y, magnetic_field.z);
     }
 };

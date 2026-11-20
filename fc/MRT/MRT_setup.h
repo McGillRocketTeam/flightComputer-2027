@@ -1,6 +1,7 @@
 #pragma once
 #include "util/helpers.h"
 #include "cmsis_os.h"
+#include "sensors/LIS2MDLapi.h"
 
 
 // ANSI COLORS
@@ -46,7 +47,7 @@ void setup_IMU();
 
 #ifdef __cplusplus
 #include "sensors/IMU.h"
-extern IMU imu;
+extern LIS2MDL_API imu;
 #endif
 
 void MRT_terminalPrint(terminal_label label, const char* peripheral, const char* state, const char* information);

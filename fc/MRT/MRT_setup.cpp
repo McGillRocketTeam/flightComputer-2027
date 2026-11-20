@@ -1,7 +1,7 @@
 #include "MRT_setup.h"
 
 static stmdev_ctx_t ctx = {lsm6dsr_i2c_write_ctx, lsm6dsr_i2c_read_ctx, &hi2c2};
-IMU imu{ctx, HAL_Delay};
+LIS2MDL_API imu(true);
 
 void MRT_terminalPrint(terminal_label label, const char* peripheral, const char* state, const char* information) {
 
@@ -38,9 +38,9 @@ extern "C" void setup_IMU(){
 
     osDelay(500);
 
-    imu.init();
+    
 
-    Sensor::ErrorCode status = imu.status();
+    uint8_t status = imu.get_constructor_status();
 
     printf("Status: %d", status);
 
