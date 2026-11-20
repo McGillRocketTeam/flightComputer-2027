@@ -1,0 +1,45 @@
+CompileFlags:
+  Add:
+    # Homebrew's clangd (mac+xpc build) can't spawn the PlatformIO/GCC-ARM
+    # cross-compiler to query its target triple and system headers --
+    # --query-driver silently fails and falls back to the host (Apple ARM)
+    # target, which then rejects GCC-only flags like -mcpu=cortex-m4. Supply
+    # the target triple and the toolchain's own headers directly instead.
+    - --target=arm-none-eabi
+    - -I/Users/marcrubeiz/.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include
+    - -I/Users/marcrubeiz/.platformio/packages/toolchain-gccarmnoneeabi/lib/gcc/arm-none-eabi/7.2.1/include
+    - -I/Users/marcrubeiz/.platformio/packages/toolchain-gccarmnoneeabi/lib/gcc/arm-none-eabi/7.2.1/include-fixed
+
+---
+
+# Headers carry no language of their own, so clangd falls back to the
+# extension and reads every .h as C -- which flags C++-only constructs
+# (default member initializers, methods, references) in headers that are
+# actually included from .cpp. Parse .h as C++ instead: C++ accepts nearly
+# all of the C in these headers, so one rule serves both sides.
+If:
+  PathMatch: [.*\.(h|hpp|hh|hxx)$]
+CompileFlags:
+  Add:
+    - -xc++
+    - -std=gnu++17
+    # C headers parsed as C++ otherwise trip on implicit void* conversions
+    # (malloc without a cast) and on C-style designated initializers.
+    - -Wno-c++11-narrowing
+    - -Wno-writable-strings
+
+---
+
+If:
+  PathMatch: [.*\.(cpp|cc|cxx)$]
+CompileFlags:
+  Add:
+    - -std=gnu++17
+
+---
+
+If:
+  PathMatch: [.*\.c$]
+CompileFlags:
+  Add:
+    - -std=gnu11

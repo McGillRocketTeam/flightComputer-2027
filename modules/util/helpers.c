@@ -28,7 +28,7 @@ void println(const char* s) {
     HAL_UART_Transmit(&DEBUGUART, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
 #endif
 }
-
+                      
 void print(const char* s) {
 #ifdef PRINT
     HAL_UART_Transmit(&DEBUGUART, (uint8_t*)s, strlen(s), HAL_MAX_DELAY);
