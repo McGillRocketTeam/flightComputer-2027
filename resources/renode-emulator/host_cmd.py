@@ -1,4 +1,5 @@
 #
+
 # host_cmd.py - inject HostPC commands into the emulated flight computer.
 #
 # HOW THE FIRMWARE CONSUMES A COMMAND
