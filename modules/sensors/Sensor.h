@@ -1,11 +1,20 @@
 #pragma once
 
 class Sensor {
-   public:
+  public:
     enum ErrorCode {
         NOMINAL = 0,
         ERROR,
         SENSOR_NOT_PRESENT,
+        SENSOR_NOT_INITIALIZED,
+
+        // GPS driver error codes
+        GPS_INVALID_ARGUMENT,
+        GPS_UART_ERROR,
+        GPS_TIMEOUT,
+        GPS_BUFFER_OVERFLOW,
+        GPS_INVALID_PACKET,
+        GPS_NACK,
     };
 
     virtual ~Sensor() = default;
@@ -16,8 +25,8 @@ class Sensor {
 
     virtual void poll() = 0;
 
-   protected:
+  protected:
     Sensor() = default;
-    Sensor(const Sensor&) = delete;
-    Sensor& operator=(const Sensor&) = delete;
+    Sensor(const Sensor &) = delete;
+    Sensor &operator=(const Sensor &) = delete;
 };
