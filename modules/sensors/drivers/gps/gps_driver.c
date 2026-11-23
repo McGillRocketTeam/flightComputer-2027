@@ -3,14 +3,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "gps_driver.h"
+#include "sensors/drivers/gps/gps_driver.h"
 #include "main.h"
 #include "sensors/drivers/gps/ubx_messages.h"
-#include "stm32f4xx_hal_def.h"
-#include "stm32f4xx_hal_uart.h"
-#include "u_ubx_protocol.h"
+#include "sensors/drivers/gps/u_ubx_protocol.h"
 #include "usart.h"
 #include "util/helpers.h"
+
+static int gps_uart_read(void *uart_bus, uint8_t *buf, uint16_t len);
+static int gps_uart_write(void *uart_bus, const uint8_t *buf, uint16_t len,
+                          uint32_t timeout);
 
 // Initializes the GPS driver.
 gps_status_t gps_driver_init(gps_driver_t *self) {

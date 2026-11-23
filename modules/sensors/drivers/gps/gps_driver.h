@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "stm32f4xx_hal_def.h"
-#include "stm32f4xx_hal_uart.h"
+#include "stm32f4xx_hal.h"
+#include "usart.h"
 #include "ubx_messages.h"
 
 #define REPLY_CLASS_ID(class, id) class << 8 | id
@@ -84,9 +84,9 @@ typedef struct gps_driver {
     long unsigned int (*get_tick)(void);
 } gps_driver_t;
 
-static int gps_uart_read(void *uart_bus, uint8_t *buf, uint16_t len);
-static int gps_uart_write(void *uart_bus, const uint8_t *buf, uint16_t len,
-                          uint32_t timeout);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 gps_status_t gps_driver_init(gps_driver_t *self);
 gps_status_t gps_driver_request_dma(gps_driver_t *self, uint16_t len);
@@ -99,3 +99,7 @@ gps_status_t gps_driver_disable_nmea_msgs(gps_driver_t *self, bool force);
 gps_status_t gps_driver_configure_dynamic_model(gps_driver_t *self, bool force);
 gps_status_t gps_driver_parse_dma_buf(gps_driver_t *self);
 gps_status_t _gps_driver_parse_pvt(gps_driver_t *self, const char *payload);
+
+#ifdef __cplusplus
+}
+#endif

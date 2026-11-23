@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <cstring>
 
-#include "GPS.h"
-#include "drivers/gps/gps_driver.h"
+#include "sensors/GPS.h"
+#include "sensors/drivers/gps/gps_driver.h"
 
 GPS::GPS() {
     memset(&_gps, 0, sizeof(gps_driver_t));
@@ -64,7 +64,7 @@ GPSTime GPS::getTime() const {
 uint32_t GPS::getLastUpdate() const { return _gps.last_update; }
 uint8_t GPS::getFixType() const { return _gps.fix_type; }
 
-Sensor::ErrorCode translateStatus(gps_status_t status) {
+Sensor::ErrorCode GPS::translateStatus(gps_status_t status) {
     switch (status) {
     case GPS_DRIVER_OK:
         return Sensor::ErrorCode::NOMINAL;
